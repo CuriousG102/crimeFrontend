@@ -31,7 +31,7 @@ var RequestMaker = {
         if (isCount) {
             this._query_detail(this._API_URL + "count/", queryDict, callback);
         } else {
-            this._query_list(this._API_URL + "count/", queryDict, callback);
+            this._query_list(this._API_URL + "crime/", queryDict, callback);
         }
     },
     _date_string : function(date) {
@@ -46,18 +46,20 @@ var RequestMaker = {
     },
     _query_list_helper: function(url, accumArray, callback, resp) {
         if (Object.keys(resp).length === 0) {
-            this._query(url, function (error, response) {
+            this._query(url, function (accumArray, callback, error, response) {
                 this._query_list_helper("doesntMatter", accumArray, callback, response);
-            });
+            }.bind(this, accumArray, callback));
         } else {
-            accumArray.push.apply(response['results']);
-            if (response['next']) {
-                this._query(response['next'], function (error, response) {
+            for (var i = 0; i < resp['results'].length; i++)
+                accumArray.push(resp['results'][i]);
+            // accumArray.push.apply(resp['results']);
+            if (resp['next']) {
+                this._query(resp['next'], function (accumArray, callback, error, response) {
                     this._query_list_helper("doesntMatter", accumArray, callback, response);
-                })
+                }.bind(this, accumArray, callback));
             }
             else {
-                callback(accumArray);
+                callback(null, accumArray);
             }
         }
     },
