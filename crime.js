@@ -1,10 +1,10 @@
 var RequestMaker = {
     _API_URL: "http://104.131.36.238/crimeAPI/",
-    crime_list : function(startDate, endDate, offense, category, callback) {
-        this._crime_query(false, startDate, endDate, offense, category, callback);
+    crime_list : function(startDate, endDate, offense, category, district, callback) {
+        this._crime_query(false, startDate, endDate, offense, category, district, callback);
     },
-    crime_count : function(startDate, endDate, offense, category, callback) {
-        this._crime_query(true, startDate, endDate, offense, category, callback);
+    crime_count : function(startDate, endDate, offense, category, district, callback) {
+        this._crime_query(true, startDate, endDate, offense, category, district, callback);
     },
     offense_list : function(callback) {
         this._query_list(this._API_URL + "offense/", {}, callback);
@@ -12,7 +12,7 @@ var RequestMaker = {
     category_list : function(callback) {
         this._query_list(this._API_URL + "category/", {}, callback);
     },
-    _crime_query : function (isCount, startDate, endDate, offense, category, callback) {
+    _crime_query : function (isCount, startDate, endDate, offense, category, district, callback) {
         var queryDict = {}; 
         if (startDate) {
             var startDateString = this._date_string(startDate);
