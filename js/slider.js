@@ -48,6 +48,32 @@ var InteractiveController = {
             }
         );
         $("#updateButton").click(this.update.bind(this));
+        var catClick = function(event) {
+                         $(".catSelectorItem").removeClass("active");
+                         $(this).addClass("active");
+                         return false; // keep the page from jumping up
+                       } 
+        var catSelector = $("#categorySelector");
+        catSelector.append($('<a></a>', {'class': 'list-group-item catSelectorItem active', 
+                                         'href': '#',
+                                         on: {
+                                           click: catClick
+                                         }
+                                        }).text("All").data('catID', null));
+        var categories = reqMaker.category_list(function (catClick, err, resp) {
+            console.log(catSelector);
+            console.log(err);
+            console.log(resp);
+            for (var i = 0; i < resp.length; i++) {
+                this.append($('<a></a>', {'class': 'list-group-item catSelectorItem',
+                                         'href': '#',
+                                         on: {
+                                           click: catClick
+                                         }
+                                        }).text(resp[i]['name']).data('catID', resp[i]['id']));
+            }
+        }.bind(catSelector, catClick));
+
         this.update();
     },
 
@@ -58,7 +84,8 @@ var InteractiveController = {
     update: function() {
         var dateValues = this.slider.dateRangeSlider("values");
         for (var i = 0; i < this.clients.length; i++)
-            this.clients[i](dateValues.min, dateValues.max);
+            this.clients[i](dateValues.min, dateValues.max, 
+                            $('.catSelectorItem.active').data('catID'));
     }
 };
 var missionControl;
