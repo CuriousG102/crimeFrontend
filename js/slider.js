@@ -61,9 +61,6 @@ var InteractiveController = {
                                          }
                                         }).text("All").data('catID', null));
         var categories = reqMaker.category_list(function (catClick, err, resp) {
-            console.log(catSelector);
-            console.log(err);
-            console.log(resp);
             for (var i = 0; i < resp.length; i++) {
                 this.append($('<a></a>', {'class': 'list-group-item catSelectorItem',
                                          'href': '#',
