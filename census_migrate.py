@@ -6,7 +6,7 @@ import json
 
 def main():
     with open('census_arr_dump.txt') as f:
-        censuses = set(f.read().split('\n')[:-1])
+        censuses = set([float(x) for x in f.read().split('\n')])
     with open('js/statewide_census_tracts.geojson') as f:
         geojson = json.load(f)
         features = geojson['features']
@@ -14,7 +14,7 @@ def main():
         i = 0
         while i < len(features):
             feature = features[i]
-            if not feature['properties']['NAME'] in censuses:
+            if not float(feature['properties']['NAME']) in censuses:
                 del features[i]
             else:
                 i += 1
