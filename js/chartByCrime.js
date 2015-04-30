@@ -22,8 +22,6 @@ var Graph1 = {
       // console.log(currentDay);
     };
 
-    console.log(currentData);
-
     var x = d3.scale.linear()
         .domain([0, d3.max(currentData)])
         .range([0, GRAPH_WIDTH]);
@@ -36,15 +34,16 @@ var Graph1 = {
                       .selectAll("div")
                       .data(currentData);
 
-    console.log(selection);
-
-    selection
-      .exit().remove();
-
     selection
       .enter().append("div")
         .style("width", function(d) { return x(d) + "px"; })
         .text(function(d) { return d; });
+
+    selection.style("width", function(d) { return x(d) + "px"; })
+      .text(function(d) { return d; });
+
+    selection
+      .exit().remove();
     
 
   },
