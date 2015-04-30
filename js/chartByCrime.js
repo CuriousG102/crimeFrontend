@@ -9,10 +9,10 @@ var Graph1 = {
 
     // fill currentData with objects with date and count attributes
     for (var i = 0; i < data.length; i++) {
-      currentDay.setHours(currentDay.getHours() + this.increment);
       currentData.push({
                         count: data[i].number,
-                        date: currentDay
+                        // setHours is only working if I tack it straight onto here
+                        date: currentDay.setHours(currentDay.getHours() + this.increment)
                       });
     };
 
@@ -38,53 +38,49 @@ var Graph1 = {
     .scale(y)
     .orient("left");
 
-    var selection = d3.select(".graph1")
+    var graph1 = d3.select(".graph1")
+
                     .attr("width", GRAPH_WIDTH)
                     .attr("height", GRAPH_HEIGHT)
                   .append("g")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    // add and turn axes
-    selection.append("g")
+    // add axes
+    graph1.append("g")
              .attr("class", "x axis")
              .attr("transform", "translate(0," + height + ")")
              .call(xAxis);
 
-    selection.append("g")
+    graph1.append("g")
              .attr("class", "y axis")
-             .call(yAxis);
-
-   /* selection = d3.select(".graph1")
-                      .selectAll("div")
-                      .data(currentData); */
-
-    // uhh cant remember
-    var bar = selection.selectAll("g")
-              .data(currentData)
-            .enter().append("g")
-              .attr("transform", function(d) { return "translate(" + x(d.date) + ",0)"; });
+             .call(yAxis)
+          .append("text")
+             .attr("transform", "rotate(-90)")
+             .attr("y", 6)
+             .attr("dy", ".71em")
+             .style("text-anchor", "end")
+             .text("Count");
 
     // add bars
-    selection.selectAll(".bar")
-             .data(currentData)
-          .enter().append("rect")
-             .attr("class", "bar")
-             .attr("x", function(d) { return x(d.date); })
-             .attr("y", function(d) { return y(d.count); })
-             .attr("height", function (d) { return height - y(d.count); })
-             .attr("width", x.rangeBand());
+    graph1.selectAll(".bar")
+          .data(currentData)
+        .enter().append("rect")
+          .attr("class", "bar")
+          .attr("x", function(d) { return x(d.date); })
+          .attr("y", function(d) { return y(d.count); })
+          .attr("height", function(d) { return height - y(d.count); })
+          .attr("width", x.rangeBand());
 
-    selection
-             .data(currentData)
-             .attr("class", "bar")
-             .attr("x", function(d) { return x(d.date); })
-             .attr("y", function(d) { return y(d.count); })
-             .attr("height", function (d) { return height - y(d.count); })
-             .attr("width", x.rangeBand());
+    // update bars
+    graph1.selectAll(".bar")
+          .attr("class", "bar")
+          .attr("x", function(d) { return x(d.date); })
+          .attr("y", function(d) { return y(d.count); })
+          .attr("height", function(d) { return height - y(d.count); })
+          .attr("width", x.rangeBand());
 
     // clear graph for next set of bars
-    selection
-      .exit().remove();
+    graph1.exit().remove();
     
 
   },
