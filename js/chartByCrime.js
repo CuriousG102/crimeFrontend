@@ -7,16 +7,13 @@ var Graph1 = {
     var currentData = []
     var currentDay = this.start;
 
-    var days = [currentDay]
-
-    // iterate through each value
+    // fill currentData with objects with date and count attributes
     for (var i = 0; i < data.length; i++) {
-
       currentDay.setHours(currentDay.getHours() + this.increment);
       currentData.push({
-        count: data[i].number,
-        date: currentDay
-      });
+                        count: data[i].number,
+                        date: currentDay
+                      });
     };
 
     console.log(currentData);
@@ -24,10 +21,6 @@ var Graph1 = {
     var margin = {top: 20, right: 30, bottom: 30, left: 40},
                   width = GRAPH_WIDTH - margin.left - margin.right,
                   height = GRAPH_HEIGHT - margin.top - margin.bottom;
-
-    /* var x = d3.scale.linear()
-        .domain([0, d3.max(currentData)])
-        .range([0, width]); */
 
     var x = d3.scale.ordinal()
             .rangeRoundBands([0, width], .1)
@@ -51,6 +44,7 @@ var Graph1 = {
                   .append("g")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+    // add and turn axes
     selection.append("g")
              .attr("class", "x axis")
              .attr("transform", "translate(0," + height + ")")
@@ -64,27 +58,31 @@ var Graph1 = {
                       .selectAll("div")
                       .data(currentData); */
 
+    // uhh cant remember
     var bar = selection.selectAll("g")
               .data(currentData)
             .enter().append("g")
               .attr("transform", function(d) { return "translate(" + x(d.date) + ",0)"; });
 
+    // add bars
     selection.selectAll(".bar")
              .data(currentData)
           .enter().append("rect")
              .attr("class", "bar")
              .attr("x", function(d) { return x(d.date); })
              .attr("y", function(d) { return y(d.count); })
-             .attr("height", function (d) { return height - y(d); })
+             .attr("height", function (d) { return height - y(d.count); })
              .attr("width", x.rangeBand());
 
     selection
+             .data(currentData)
              .attr("class", "bar")
              .attr("x", function(d) { return x(d.date); })
              .attr("y", function(d) { return y(d.count); })
-             .attr("height", function (d) { return height - y(d); })
+             .attr("height", function (d) { return height - y(d.count); })
              .attr("width", x.rangeBand());
 
+    // clear graph for next set of bars
     selection
       .exit().remove();
     
