@@ -3,6 +3,7 @@
     <meta charset="utf-8"/>
     <title>Daily Texan on Crime</title>
 
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <script src="js/crime.js"></script>
     <link rel="stylesheet" href="css/iThing-min.css" type="text/css" />
@@ -12,8 +13,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css" />
     <script src="js/jQDateRangeSlider-withRuler-min.js"></script>
     <script src="js/slider.js"></script>
+    <script src="js/map.js"></script>
   </head>
   <body>
+    <div id="map"></div>
     <div id="slider"></div>
     <button type="button" class="btn btn-primary" id="updateButton">Update Interactive</button>
     <div class="list-group" id="categorySelector"></div>
