@@ -11,12 +11,15 @@ var Graph1 = {
 
     // iterate through each value
     for (var i = 0; i < data.length; i++) {
-      currentData.push(data[i].number);
 
-      // update the date so as to line up with it's value
       currentDay.setHours(currentDay.getHours() + this.increment);
-      days.push(currentDay);
+      currentData.push({
+        count: data[i].number,
+        date: currentDay
+      });
     };
+
+    console.log(currentData);
 
     var margin = {top: 20, right: 30, bottom: 30, left: 40},
                   width = GRAPH_WIDTH - margin.left - margin.right,
@@ -28,17 +31,11 @@ var Graph1 = {
 
     var x = d3.scale.ordinal()
             .rangeRoundBands([0, width], .1)
-            .domain( function(days) {
-              for (var i = 0; i < days.length - 1; i++) {
-                return days[i];
-              };
-            });
+            .domain(currentData.map(function(d) { return d.date; }));
 
     var y = d3.scale.linear()
             .range([height, 0])
-            .domain([0, d3.max(currentData)]);
-
-    console.log(height, width);
+            .domain([0, d3.max(currentData, function(d) { return d.count; })]);
 
     var xAxis = d3.svg.axis()
     .scale(x)
@@ -70,21 +67,21 @@ var Graph1 = {
     var bar = selection.selectAll("g")
               .data(currentData)
             .enter().append("g")
-              .attr("transform", function(d) { return "translate(" + x(currentDay) + ",0)"; });
+              .attr("transform", function(d) { return "translate(" + x(d.date) + ",0)"; });
 
     selection.selectAll(".bar")
              .data(currentData)
           .enter().append("rect")
              .attr("class", "bar")
-             .attr("x", function(d) { return x(days); })
-             .attr("y", function(d) { return y(d); })
+             .attr("x", function(d) { return x(d.date); })
+             .attr("y", function(d) { return y(d.count); })
              .attr("height", function (d) { return height - y(d); })
              .attr("width", x.rangeBand());
 
     selection
              .attr("class", "bar")
-             .attr("x", function(d) { return x(days); })
-             .attr("y", function(d) { return y(d); })
+             .attr("x", function(d) { return x(d.date); })
+             .attr("y", function(d) { return y(d.count); })
              .attr("height", function (d) { return height - y(d); })
              .attr("width", x.rangeBand());
 
