@@ -10,6 +10,8 @@ var CrimeMap = {
     area_tracts: [],
     areas_active: false,
     tracts_active: false,
+    areas_legend_numbers: null,
+    tracts_legend_numbers: null, // these two are arrays that hold the upper thresholds for colors given via our legend
 
     draw: function() {
         var svg = d3.select("#map").append("svg")
@@ -117,6 +119,7 @@ var CrimeMap = {
             for (var i = 0; i < resp.length; i++)
                 data[Number(resp[i]['offense_census_tract'])] = resp[i]['count'];
             this.color(data);
+
         }.bind(this));
     },
     color: function(data) {
@@ -191,6 +194,8 @@ var CrimeMap = {
         for (var i = 1; i < number_of_shades; i++)
             crimeNumbersAreas.push(maxNumCrimesAreas*i/number_of_shades);
 
+        this.areas_legend_numbers = crimeNumbersAreas.slice(1);
+
         var colorAreas = d3.scale.threshold()
             .domain(crimeNumbersAreas)
             .range(shades);
@@ -211,6 +216,8 @@ var CrimeMap = {
 
             for (var i = 1; i < number_of_shades; i++)
                 crimeNumbersTracts.push(maxNumCrimesTracts*i/number_of_shades);
+
+            this.tracts_legend_numbers = crimeNumbersTracts.slice(1);
 
             var colorTracts = d3.scale.threshold()
             .domain(crimeNumbersTracts)
