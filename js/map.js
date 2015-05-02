@@ -1,23 +1,76 @@
 var CrimeMap = {
     WIDTH: 700,
     HEIGHT: 600,
-    DEFAULT_COLOR: "#B0B0B0",
-    BORDER_COLORS: "#4262C2",
+    DEFAULT_COLOR: "rgb(255,255,178)",
+    BORDER_COLORS: "#000",
+    CHORO_COLORS: ['rgb(254,217,118)','rgb(254,178,76)',
+                   'rgb(253,141,60)','rgb(240,59,32)',
+                   'rgb(189,0,38)'], // http://colorbrewer2.org/
+    svg: null,
+    area_tracts: [],
     draw: function() {
         var svg = d3.select("#map").append("svg")
                 .attr("width", this.WIDTH)
                 .attr("height", this.HEIGHT);
+        this.svg = svg;
 
-        /*var projection = d3.geo.mercator()
-            .center([97.73, 30.27])
-            .scale(10000)
-            .translate([self.WIDTH/2, self.HEIGHT/2]);*/
+        var drawOverlay = function() {
+            d3.json("js/apd_areas_sample.topojson", function(error, areas_map) {
+                if (error) return console.error(error);
 
-        /*var path = d3.geo.path()
-            .projection(projection);*/
+                var areas = areas_map.objects.apd_areas_sample;
+                var geojson = topojson.feature(areas_map, areas);
+                var center = d3.geo.centroid(geojson);
+                var scale = 150;
+                var offset = [this.WIDTH/2, this.HEIGHT/2];
+                var projection = d3.geo.mercator().scale(scale).center(center)
+                    .translate(offset);
 
-        /*
-        d3.json("js/apd_census_tracts_pared.topojson", function(error, tracts_map) {
+                var path = d3.geo.path().projection(projection);
+
+
+                var bounds  = path.bounds(geojson);
+                var hscale  = scale*this.WIDTH  / (bounds[1][0] - bounds[0][0]);
+                var vscale  = scale*this.HEIGHT / (bounds[1][1] - bounds[0][1]);
+                var scale   = (hscale < vscale) ? hscale : vscale;
+                var offset  = [this.WIDTH - (bounds[0][0] + bounds[1][0])/2,
+                               this.HEIGHT - (bounds[0][1] + bounds[1][1])/2];
+
+                projection = d3.geo.mercator().center(center)
+                    .scale(scale).translate(offset);
+                path = path.projection(projection);
+
+                this.svg.selectAll(".area")
+                    .data(geojson.features)
+                  .enter().append("path")
+                    .attr("id", function(d){ return "area " + d.id; })
+                    .attr("d", path)
+                    .attr("class", "area")
+                    .style("fill", this.DEFAULT_COLOR)
+                    .style("stroke-width", "1")
+                    .style("stroke", this.BORDER_COLORS);
+
+                // run this last, because it may be slow
+                // map draw has priority. Also, this should be its
+                // own function because it has little to do with drawing
+                // an overlay. There should be a "setup" function calling
+                // both drawOverlay and this
+                var featuresArray = geojson.features;
+                for (var i = 0; i < featuresArray.length; i++) {
+                    var area = featuresArray[i];
+                    if (area.properties.AREA_NAME) {
+                        var tracts = area.id.split(',');
+                        for (var j = 0; j < tracts.length; j++)
+                            tracts[j] = Number(tracts[j]);
+                        this.area_tracts.push(tracts);
+                    }
+                }
+
+
+            }.bind(this));
+        }.bind(this);
+
+        d3.json("js/apd_census_tracts_pared.topojson", function(drawOverlay, error, tracts_map) {
             if (error) return console.error(error);
 
             var tracts = tracts_map.objects.apd_census_tracts_pared;
@@ -29,8 +82,6 @@ var CrimeMap = {
                 .translate(offset);
 
             var path = d3.geo.path().projection(projection);
-
-
             var bounds  = path.bounds(geojson);
             var hscale  = scale*this.WIDTH  / (bounds[1][0] - bounds[0][0]);
             var vscale  = scale*this.HEIGHT / (bounds[1][1] - bounds[0][1]);
@@ -43,64 +94,110 @@ var CrimeMap = {
             path = path.projection(projection);
 
             svg.append("rect").attr('width', this.WIDTH).attr('height', this.HEIGHT)
-                .style('stroke', 'black').style('fill', 'none');
+                    .style('stroke', 'black').style('fill', 'none');
 
-            svg.selectAll(".area")
-                .data(geojson.features)
-              .enter().append("path")
-                .attr("id", function(d){ return "tract " + d.id; })
-                .attr("d", path)
-                .style("fill", this.DEFAULT_COLOR)
-                .style("stroke-width", "1")
-                .style("stroke", this.BORDER_COLORS);
-
-
+            svg.selectAll(".tract")
+                    .data(geojson.features)
+                  .enter().append("path")
+                    .attr("id", function(d){ return "tract " + d.id; })
+                    .attr("class", "tract")
+                    .attr("d", path)
+                    .style("fill", this.DEFAULT_COLOR)
+                    .style("stroke-width", "1")
+                    .style("stroke", this.BORDER_COLORS);
+            drawOverlay();
+        }.bind(this, drawOverlay));
+    },
+    display: function(start, end, catNum) {
+        reqMaker.district_count(start, end, null, catNum, function(err, resp) {
+            var data = {};
+            for (var i = 0; i < resp.length; i++)
+                data[Number(resp[i]['offense_census_tract'])] = resp[i]['count'];
+            this.color(data);
         }.bind(this));
-*/
+    },
+    color: function(data) {
+        var number_of_shades = this.CHORO_COLORS.length;
+        var shades = [this.DEFAULT_COLOR];
+        shades.push.apply(shades, this.CHORO_COLORS);
 
-        d3.json("js/apd_areas_sample.topojson", function(error, areas_map) {
-            if (error) return console.error(error);
+        var maxNumCrimes = 0; // we will use this to construct a legend
 
-            var areas = areas_map.objects.apd_areas_sample;
-            var geojson = topojson.feature(areas_map, areas);
-            var center = d3.geo.centroid(geojson);
-            var scale = 150;
-            var offset = [this.WIDTH/2, this.HEIGHT/2];
-            var projection = d3.geo.mercator().scale(scale).center(center)
-                .translate(offset);
+        for (var tract in data)
+            if (data.hasOwnProperty(tract))
+                if (data[tract] > maxNumCrimes) maxNumCrimes = data[tract];
 
-            var path = d3.geo.path().projection(projection);
+        // there are optimizations here but in the spirit of keeping
+        // code readable I'm going to resist the urge to do
+        // premature optimization
+        for (var i = 0; i < this.area_tracts.length; i++) {
+            var area_tract = this.area_tracts[i];
+            var numCrimesInArea = 0;
+            for (var j = 0; j < area_tract.length; j++) {
+                numCrimesInArea += data[area_tract[j]];
+            }
+            if (numCrimesInArea > maxNumCrimes) 
+                maxNumCrimes = numCrimesInArea;
+        }
 
+        if (maxNumCrimes < number_of_shades) { // we have too few crimes to 
+                this.svg.selectAll(".area")    // fill the map
+                .style("fill", function(d) {
+                    return this.DEFAULT_COLOR;
+                }.bind(this));
+                return;
+        }
 
-            var bounds  = path.bounds(geojson);
-            var hscale  = scale*this.WIDTH  / (bounds[1][0] - bounds[0][0]);
-            var vscale  = scale*this.HEIGHT / (bounds[1][1] - bounds[0][1]);
-            var scale   = (hscale < vscale) ? hscale : vscale;
-            var offset  = [this.WIDTH - (bounds[0][0] + bounds[1][0])/2,
-                           this.HEIGHT - (bounds[0][1] + bounds[1][1])/2];
+        // crimeNumbers is a list of NUMBER_OF_SHADES values to be
+        // used to map numbers of crimes to colors on the map.
+        // so if maxNumCrimes is 10 and NUMBER_OF_SHADES is 5, 
+        // then crimeNumbers is [1, maxNumCrimes*1/NUMBER_OF_SHADES,
+        //                       maxNumCrimes*2/NUMBER_OF_SHADES,
+        //                       ..., maxNumCrimes*(NUMBER_OF_SHADES-1)/NUMBER_OF_SHADES]
+        //                      = [1, 2, 4, 6, 8]
+        // and these values map to the following colors for 
+        // each tract, area, etc.:
+        // (-inf, 1): this.DEFAULT_COLOR (think of as color 0)
+        // [1, 2):    color1
+        // [2, 4):    color2
+        // [4, 6):    color3
+        // [6, 8):    color4
+        // [8, +inf): color5
+        // the behavior will hold for combinations of values
+        // that produce floats, but for the purposes of displaying
+        // a legend it's recommended that you round up the values
+        // on the legend to whole numbers.
+        // I would change that detail here but I eventually may
+        // want this to work for percentages (e.g. crimes/resident)
+        // and that would make the task of changing this code harder
 
-            projection = d3.geo.mercator().center(center)
-                .scale(scale).translate(offset);
-            path = path.projection(projection);
+        var crimeNumbers = [1];
 
-            svg.append("rect").attr('width', this.WIDTH).attr('height', this.HEIGHT)
-                .style('stroke', 'black').style('fill', 'none');
+        for (var i = 1; i < number_of_shades; i++)
+            crimeNumbers.push(maxNumCrimes*i/number_of_shades);
 
-            svg.selectAll(".area")
-                .data(geojson.features)
-              .enter().append("path")
-                .attr("id", function(d){ return "area " + d.id; })
-                .attr("d", path)
-                .style("fill", this.DEFAULT_COLOR)
-                .style("stroke-width", "1")
-                .style("stroke", this.BORDER_COLORS);
+        var color = d3.scale.threshold()
+            .domain(crimeNumbers)
+            .range(shades);
 
+        this.svg.selectAll(".area")
+        .style("fill", function(d) {
+            var numCrimes = 0;
+            var idsToLookup = d.id.split(',');
+            
+            for (var i = 0; i < idsToLookup.length; i++) {
+                var idToLookup = Number(idsToLookup[i]);
+                numCrimes += (idToLookup in this.data) ? this.data[idToLookup] : 0;
+            }
+            return this.color(numCrimes);
 
-        }.bind(this));
+        }.bind({color:color,
+                data:data}));
     }
 }
 
 $().ready(function () {
     var crimeMap = Object.create(CrimeMap);
-    crimeMap.draw(); 
+    crimeMap.draw.bind(crimeMap)();
+    missionControl.addClient(crimeMap.display.bind(crimeMap));
 });
