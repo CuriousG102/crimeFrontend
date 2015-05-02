@@ -8,6 +8,9 @@ var CrimeMap = {
                    'rgb(189,0,38)'], // http://colorbrewer2.org/
     svg: null,
     area_tracts: [],
+    areas_active: false,
+    tracts_active: false,
+
     draw: function() {
         var svg = d3.select("#map").append("svg")
                 .attr("width", this.WIDTH)
@@ -121,32 +124,33 @@ var CrimeMap = {
         var shades = [this.DEFAULT_COLOR];
         shades.push.apply(shades, this.CHORO_COLORS);
 
-        var maxNumCrimes = 0; // we will use this to construct a legend
+        var maxNumCrimesTracts = 0;
 
-        for (var tract in data)
+        for (tract in data)
             if (data.hasOwnProperty(tract))
-                if (data[tract] > maxNumCrimes) maxNumCrimes = data[tract];
+                if (data[tract] > maxNumCrimesTracts) maxNumCrimesTracts = data[tract];
 
-        // there are optimizations here but in the spirit of keeping
-        // code readable I'm going to resist the urge to do
-        // premature optimization
+        var maxNumCrimesAreas = maxNumCrimesTracts;
+
         for (var i = 0; i < this.area_tracts.length; i++) {
             var area_tract = this.area_tracts[i];
             var numCrimesInArea = 0;
             for (var j = 0; j < area_tract.length; j++) {
                 numCrimesInArea += data[area_tract[j]];
             }
-            if (numCrimesInArea > maxNumCrimes) 
-                maxNumCrimes = numCrimesInArea;
+            if (numCrimesInArea > maxNumCrimesAreas) 
+                maxNumCrimesAreas = numCrimesInArea;
         }
 
-        if (maxNumCrimes < number_of_shades) { // we have too few crimes to 
+        if (maxNumCrimesAreas < number_of_shades) { // we have too few crimes to 
                 this.svg.selectAll(".area")    // fill the map
                 .style("fill", function(d) {
                     return this.DEFAULT_COLOR;
                 }.bind(this));
+                this.areas_active = false;
                 return;
         }
+        this.areas_active = true;
 
         // crimeNumbers is a list of NUMBER_OF_SHADES values to be
         // used to map numbers of crimes to colors on the map.
@@ -171,28 +175,52 @@ var CrimeMap = {
         // want this to work for percentages (e.g. crimes/resident)
         // and that would make the task of changing this code harder
 
-        var crimeNumbers = [1];
-
-        for (var i = 1; i < number_of_shades; i++)
-            crimeNumbers.push(maxNumCrimes*i/number_of_shades);
-
-        var color = d3.scale.threshold()
-            .domain(crimeNumbers)
-            .range(shades);
-
-        this.svg.selectAll(".area")
-        .style("fill", function(d) {
+        var selectFill = function(d) {
             var numCrimes = 0;
             var idsToLookup = d.id.split(',');
             
             for (var i = 0; i < idsToLookup.length; i++) {
                 var idToLookup = Number(idsToLookup[i]);
-                numCrimes += (idToLookup in this.data) ? this.data[idToLookup] : 0;
+                numCrimes += (this.data.hasOwnProperty(idToLookup)) ? this.data[idToLookup] : 0;
             }
             return this.color(numCrimes);
+        };
 
-        }.bind({color:color,
-                data:data}));
+        var crimeNumbersAreas = [1];
+
+        for (var i = 1; i < number_of_shades; i++)
+            crimeNumbersAreas.push(maxNumCrimesAreas*i/number_of_shades);
+
+        var colorAreas = d3.scale.threshold()
+            .domain(crimeNumbersAreas)
+            .range(shades);
+
+        this.svg.selectAll(".area")
+        .style("fill", selectFill.bind({color:colorAreas,
+                                        data:data}));
+
+        if (maxNumCrimesTracts < number_of_shades) { // we have too few crimes for the tract level view
+            this.svg.selectAll(".tract")
+            .style("fill", function(d) {
+                this.DEFAULT_COLOR;
+            }.bind(this));
+            this.tracts_active = false;
+        } else {
+            this.tracts_active = true;
+            var crimeNumbersTracts = [1];
+
+            for (var i = 1; i < number_of_shades; i++)
+                crimeNumbersTracts.push(maxNumCrimesTracts*i/number_of_shades);
+
+            var colorTracts = d3.scale.threshold()
+            .domain(crimeNumbersTracts)
+            .range(shades);
+
+            this.svg.selectAll(".tract")
+            .style("fill", selectFill.bind({color:colorTracts,
+                                            data:data}));
+        }        
+
     }
 }
 
