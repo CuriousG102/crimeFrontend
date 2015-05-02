@@ -1,10 +1,10 @@
 var RequestMaker = {
     _API_URL: "http://104.131.36.238/crimeAPI/",
     crime_list : function(startDate, endDate, offense, category, district, callback) {
-        this._crime_query(false, null, startDate, endDate, offense, category, district, callback);
+        this._crime_query(false, null, false, startDate, endDate, offense, category, district, callback);
     },
     crime_count : function(startDate, endDate, offense, category, district, callback) {
-        this._crime_query(true, null, startDate, endDate, offense, category, district, callback);
+        this._crime_query(true, null, false, startDate, endDate, offense, category, district, callback);
     },
     offense_list : function(callback) {
         this._query_list(this._API_URL + "offense/", {}, callback);
@@ -13,9 +13,14 @@ var RequestMaker = {
         this._query_list(this._API_URL + "category/", {}, callback);
     },
     crime_count_increment : function(increment, startDate, endDate, offense, category, district, callback) {
-        this._crime_query(true, increment, startDate, endDate, offense, category, district, callback);
+        this._crime_query(true, increment, false, startDate, endDate, offense, category, district, callback);
     },
-    _crime_query : function (isCount, increment, startDate, endDate, offense, category, district, callback) {
+    district_count : function(startDate, endDate, offense, category, callback) {
+        this._crime_query(true, null, true, startDate, endDate, offense, category, null, callback);
+    },
+    _crime_query : function (isCount, increment, isDistrictCount, startDate, endDate, offense, category, district, callback) {
+        // as I added public facing helper functions, this function slowly
+        // became a monster. I think it is a prime candidate for refactoring
         var queryDict = {}; 
         if (startDate) {
             var startDateString = this._date_string(startDate);
@@ -32,11 +37,13 @@ var RequestMaker = {
             queryDict['category'] = category;
         }
         if (isCount) {
-            if (!increment)
+            if (!increment && !isDistrictCount)
                 this._query_detail(this._API_URL + "count/", queryDict, callback);
-            else {
+            else if (!isDistrictCount) {
                 queryDict['increment'] = increment;
                 this._query_detail(this._API_URL + "countincrement/", queryDict, callback);
+            } else {
+                this._query_detail(this._API_URL + "district/", queryDict, callback);
             }
         } else {
             this._query_list(this._API_URL + "crime/", queryDict, callback);
