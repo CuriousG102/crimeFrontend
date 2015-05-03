@@ -5,96 +5,30 @@ var Graph1 = {
   GRAPH_HEIGHT: 500,
   inner_width: null,
   inner_height: null,
+  graph1: null,
+  yScaler: null,
+  xScaler: null,
 
   setupGraph: function() {
-    var margin = {top: 20, right: 30, bottom: 30, left: 55},
-        inner_width = this.GRAPH_WIDTH - margin.left - margin.right,
-        inner_height = this.GRAPH_HEIGHT - margin.top - margin.bottom;
+    var margin = {top: 20, right: 30, bottom: 30, left: 55};
+    this.inner_width = this.GRAPH_WIDTH - margin.left - margin.right;
+    this.inner_height = this.GRAPH_HEIGHT - margin.top - margin.bottom;
 
-    var y = d3.scale.linear()
+    this.yScaler = d3.scale.linear()
             .range([this.inner_height, 0])
             .domain([0, 400]); // change this
 
     var yAxis = d3.svg.axis()
-    .scale(y)
+    .scale(this.yScaler)
     .orient("left");
 
-    var graph = d3.select(".graph1")
+    this.graph1 = d3.select(".graph1")
                     .attr("width", this.GRAPH_WIDTH)
                     .attr("height", this.GRAPH_HEIGHT)
                   .append("g")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     
-    return graph;
-
-  },
-
-  drawGraph: function(data) {
-    var currentData = [];
-    var currentDay = this.start;
-
-    console.log(this.setupGraph);
-
-    // fill currentData with objects with date and count attributes
-    // *** doesn't include the first day ***
-    for (var i = 0; i < data.length; i++) {
-      currentData.push({
-                        count: data[i].number,
-                        date: currentDay.setHours(currentDay.getHours() + this.increment)
-                      });
-    };
-
-    console.log(currentData);
- 
-
- // start
- /*
-    var margin = {top: 20, right: 30, bottom: 30, left: 55},
-                  width = GRAPH_WIDTH - margin.left - margin.right,
-                  height = GRAPH_HEIGHT - margin.top - margin.bottom;
-
-    var x = d3.scale.ordinal() // don't include
-            .rangeRoundBands([0, width], .1)
-            .domain(currentData.map(function(d) { return d.date; }));
-
-    var y = d3.scale.linear()
-            .range([height, 0])
-            .domain([0, d3.max(currentData, function(d) { return d.count; })]);
-
-    var xAxis = d3.svg.axis()
-    .scale(x) // don't include
-    .orient("bottom");
-
-    var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left");
-
-    var graph1 = d3.select(".graph1")
-
-                    .attr("width", GRAPH_WIDTH)
-                    .attr("height", GRAPH_HEIGHT)
-                  .append("g")
-                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-    */
-    // end
-
-
-
-    var x = d3.scale.ordinal() 
-            .rangeRoundBands([0, this.inner_width], .1)
-            .domain(currentData.map(function(d) { return d.date; }));
-
-    var xAxis = d3.svg.axis()
-    .scale(x) 
-    .orient("bottom");
-
-    // add axes
-    graph1.append("g")
-             .attr("class", "x axis")
-             .attr("transform", "translate(0," + this.inner_height + ")")
-             .call(xAxis);
-
-    graph1.append("g")
+    this.graph1.append("g")
              .attr("class", "y axis")
              .call(yAxis)
           .append("text")
@@ -105,41 +39,68 @@ var Graph1 = {
              .style("text-anchor", "end")
              .text("Count");
 
+  },
+
+  drawGraph: function(start, end, increment, data) {
+    var currentData = [];
+    var currentDay = start;
+
+    // fill currentData with objects with date and count attributes
+    // *** doesn't include the first day ***
+    for (var i = 0; i < data.length; i++) {
+      currentData.push({
+                        count: data[i].number,
+                        date: currentDay.setHours(currentDay.getHours() + increment)
+                      });
+    };
+
+    console.log(currentData);
+
+    this.xScaler = d3.scale.ordinal() 
+        .rangeRoundBands([0, this.inner_width], .1)
+        .domain(currentData.map(function(d) { return d.date; }));
+
+    var xAxis = d3.svg.axis()
+    .scale(this.xScaler) 
+    .orient("bottom");
+
+    // add x axis
+    this.graph1.append("g")
+             .attr("class", "x axis")
+             .attr("transform", "translate(0," + this.inner_height + ")")
+             .call(xAxis);
+
     // add bars
-    // update selection
-    var selection = graph1.selectAll(".bar")
-                    .data(currentData)
+    var selection = this.graph1.selectAll(".bar")
+                    .data(currentData);
 
     selection
         .enter().append("rect")
           .attr("class", "bar")
-          .attr("x", function(d) { return x(d.date); })
-          .attr("y", function(d) { return y(d.count); })
-          .attr("height", function(d) { return this.inner_height - y(d.count); })
-          .attr("width", x.rangeBand());
+          .attr("x", function(d) { return this.xScaler(d.date); }.bind(this))
+          .attr("y", function(d) { return this.yScaler(d.count); }.bind(this))
+          .attr("height", function(d) { return this.inner_height - this.yScaler(d.count); }.bind(this))
+          .attr("width", this.xScaler.rangeBand());
 
     // update bars
-    selection.selectAll(".bar")
+    selection
           .attr("class", "bar")
-          .attr("x", function(d) { return x(d.date); })
-          .attr("y", function(d) { return y(d.count); })
-          .attr("height", function(d) { return this.inner_height - y(d.count); })
-          .attr("width", x.rangeBand());
+          .attr("x", function(d) { return this.xScaler(d.date); }.bind(this))
+          .attr("y", function(d) { return this.yScaler(d.count); }.bind(this))
+          .attr("height", function(d) { return this.inner_height - this.yScaler(d.count); }.bind(this))
+          .attr("width", this.xScaler.rangeBand());
 
     // clear graph for next set of bars
     selection.exit().remove();
-    
 
   },
   
   display: function(start, end, catID) {
 
-    reqMaker.crime_count_increment(24, start, 
+    reqMaker.crime_count_increment(this.INCREMENT_NUM_HOURS, start, 
                                    end, null, catID, 
                                    null, 
-                                   this.drawGraph.bind({start: start, 
-                                                        end: end, 
-                                                        increment: this.INCREMENT_NUM_HOURS})); 
+                                   this.drawGraph.bind(this, start, end, this.INCREMENT_NUM_HOURS));
   } 
 }
 
