@@ -12,11 +12,17 @@ var CrimeMap = {
     tracts_active: false,
     areas_legend_numbers: null,
     tracts_legend_numbers: null, // these two are arrays that hold the upper thresholds for colors given via our legend
+    previous_area: null, // the area that we were previously zoome in on,
+                         // stored as an instance variable so we can zoom
+                         // in on the next area while setting other areas
+                         // to not be classed as active in O(1) rather than
+                         // O(n)
 
     draw: function() {
         var svg = d3.select("#map").append("svg")
                 .attr("width", this.WIDTH)
-                .attr("height", this.HEIGHT);
+                .attr("height", this.HEIGHT)
+                .append("g");
         this.svg = svg;
 
         var drawOverlay = function() {
@@ -48,12 +54,41 @@ var CrimeMap = {
                 this.svg.selectAll(".area")
                     .data(geojson.features)
                   .enter().append("path")
-                    .attr("id", function(d){ return "area " + d.id; })
+                    .attr("id", function(d){ return "area" + d.id; })
                     .attr("d", path)
                     .attr("class", "area")
                     .style("fill", this.DEFAULT_COLOR)
                     .style("stroke-width", "1")
-                    .style("stroke", this.BORDER_COLORS);
+                    .style("stroke", this.BORDER_COLORS)
+                    .on("click", function(path, d) {
+                        if (this.previous_area)
+                            this.previous_area.classed("active", false);
+
+                        // regex replace below is necessary to escape
+                        // special characters present in the id
+                        this.previous_areas = d3.select("#area" + d.id.replace(/\.|,/g, "\\."))
+                                                .classed("active", true);
+
+                        // http://bl.ocks.org/mbostock/4699541
+                        var bounds = path.bounds(d),
+                            dx = bounds[1][0] - bounds[0][0],
+                            dy = bounds[1][1] - bounds[0][1],
+                            x = (bounds[0][0] + bounds[1][0]) / 2,
+                            y = (bounds[0][1] + bounds[1][1]) / 2,
+                            scale = .9 / Math.max(dx / this.WIDTH, dy / this.HEIGHT),
+                            translate = [this.WIDTH / 2 - scale * x, this.HEIGHT / 2 - scale * y];
+
+                        this.svg.transition()
+                            .duration(750)
+                            .style("stroke-width", 1.5 / scale + "px")
+                            .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+                    }.bind(this, path))
+                    .on("mouseover", function(d) {
+                        return; // to be continued ...
+                    }.bind(this))
+                    .on("mouseout", function(d) {
+                        return; // to be continued ...
+                    }.bind(this));
 
                 // run this last, because it may be slow
                 // map draw has priority. Also, this should be its
@@ -104,7 +139,7 @@ var CrimeMap = {
             svg.selectAll(".tract")
                     .data(geojson.features)
                   .enter().append("path")
-                    .attr("id", function(d){ return "tract " + d.id; })
+                    .attr("id", function(d){ return "tract" + d.id; })
                     .attr("class", "tract")
                     .attr("d", path)
                     .style("fill", this.DEFAULT_COLOR)
