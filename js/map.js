@@ -119,6 +119,7 @@ var CrimeMap = {
                     .attr("id", function(d){ return "area" + d.id; })
                     .attr("d", path)
                     .attr("class", "area")
+                    .classed("clickableArea", function(d) {return d.id.split(",").length > 1})
                     .style("fill", this.DEFAULT_COLOR)
                     .style("stroke-width", "1")
                     .style("stroke", this.BORDER_COLORS)
