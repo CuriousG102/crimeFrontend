@@ -61,13 +61,15 @@ var CrimeMap = {
                     .style("stroke-width", "1")
                     .style("stroke", this.BORDER_COLORS)
                     .on("click", function(path, d) {
-                        if (this.previous_area)
+                        if (this.previous_area) {
                             this.previous_area.classed("active", false);
+                        }
 
                         // regex replace below is necessary to escape
                         // special characters present in the id
-                        this.previous_areas = d3.select("#area" + d.id.replace(/\.|,/g, "\\."))
-                                                .classed("active", true);
+                        this.previous_area = d3.select("#area" + d.id.replace(/\./g, "\\.")
+                                                                     .replace(/,/g, "\\,"))
+                                               .classed("active", true);
 
                         // http://bl.ocks.org/mbostock/4699541
                         var bounds = path.bounds(d),
