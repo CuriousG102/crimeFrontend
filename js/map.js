@@ -10,6 +10,8 @@ var CrimeMap = {
     TRACT_CHORO_COLORS: ['rgb(199,233,180)','rgb(127,205,187)',
                          'rgb(65,182,196)','rgb(44,127,184)',
                          'rgb(37,52,148)'],
+    NO_AREA_VALUES_TEXT: 'Unfortuntately, there is not enough data to color the map for this date range',
+    NO_TRACT_VALUES_TEXT: 'Unfortunately, there is not enough data to color the map at this detail level for this date range',
     svg: null,
     area_tracts: [],
     areas_active: false,
@@ -21,7 +23,63 @@ var CrimeMap = {
                          // in on the next area while setting other areas
                          // to not be classed as active in O(1) rather than
                          // O(n)
+    plotLegend: function(isArea) {
+        var legendBox = d3.select("#mapLegend").html("");
 
+        var makeLegend = function(shades, legend_numbers) {
+            var colorNumbers = [];
+            colorNumbers.push({color: shades[0],
+                               text: "0"});
+            colorNumbers.push({color: shades[1],
+                               text: "1 to " + 
+                               Math.ceil(legend_numbers[0])});
+
+            for (var i = 1; i < shades.length - 1; i++) {
+                var text = [Math.ceil(legend_numbers[i- 1]),
+                            "to", 
+                            Math.ceil(legend_numbers[i])].join(" ");
+                colorNumbers.push({color:shades[i],
+                                   text: text});
+            }
+
+            var legendEntriesEnter = legendBox.selectAll(".legendEntry")
+                                            .data(colorNumbers)
+                                            .enter()
+                                            .append("div")
+                                            .attr("class", "legendEntry");
+
+                    
+            legendEntriesEnter.append("div")
+                            .attr("class", "legendEntryColor")
+                            .attr("fill", function(d){return d.color;});
+
+            legendEntriesEnter.append("div")
+                            .attr("class", "legendEntryText")
+                            .text(function(d){return d.text;});
+        }
+
+        if (isArea) {
+            if (!this.areas_active) {
+                legendBox.append("div")
+                         .attr("class", "noValues")
+                         .text(this.NO_AREA_VALUES_TEXT);
+            } else {
+                var shades = [this.DEFAULT_COLOR];
+                shades.push.apply(shades, this.CHORO_COLORS);
+                makeLegend(shades, this.areas_legend_numbers);
+            }
+        } else { // !isArea
+            if (!this.tracts_active) {
+                legendBox.append("div")
+                         .attr("class", "noValues")
+                         .text(this.NO_TRACT_VALUES_TEXT);
+            } else {
+                var shades = [this.TRACT_DEFAULT_COLOR];
+                shades.push.apply(shades, this.TRACT_CHORO_COLORS);
+                makeLegend(shades, this.tracts_legend_numbers);
+            }
+        }
+    },
     draw: function() {
         var svg = d3.select("#map").append("svg")
                 .attr("width", this.WIDTH)
@@ -70,6 +128,7 @@ var CrimeMap = {
                         // no sense at all to zoom. Same for no colors in areas.
                         if(d.id.split(",").length < 2  || !this.areas_active) return; 
 
+                        this.plotLegend(false);
                         if (this.previous_area) {
                             this.previous_area.classed("active", false);
                         }
@@ -165,6 +224,7 @@ var CrimeMap = {
             for (var i = 0; i < resp.length; i++)
                 data[Number(resp[i]['offense_census_tract'])] = resp[i]['count'];
             this.color(data);
+            this.plotLegend(true);
 
         }.bind(this));
     },
@@ -243,6 +303,8 @@ var CrimeMap = {
             crimeNumbersAreas.push(maxNumCrimesAreas*i/number_of_shades);
 
         this.areas_legend_numbers = crimeNumbersAreas.slice(1);
+        this.areas_legend_numbers.push(maxNumCrimesAreas);
+
 
         var colorAreas = d3.scale.threshold()
             .domain(crimeNumbersAreas)
@@ -266,6 +328,7 @@ var CrimeMap = {
                 crimeNumbersTracts.push(maxNumCrimesTracts*i/number_of_shades);
 
             this.tracts_legend_numbers = crimeNumbersTracts.slice(1);
+            this.tracts_legend_numbers.push(maxNumCrimesTracts);
 
             var colorTracts = d3.scale.threshold()
             .domain(crimeNumbersTracts)
