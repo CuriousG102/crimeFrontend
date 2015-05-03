@@ -6,6 +6,10 @@ var CrimeMap = {
     CHORO_COLORS: ['rgb(254,217,118)','rgb(254,178,76)',
                    'rgb(253,141,60)','rgb(240,59,32)',
                    'rgb(189,0,38)'], // http://colorbrewer2.org/
+    TRACT_DEFAULT_COLOR: 'rgb(255,255,204)',
+    TRACT_CHORO_COLORS: ['rgb(199,233,180)','rgb(127,205,187)',
+                         'rgb(65,182,196)','rgb(44,127,184)',
+                         'rgb(37,52,148)'],
     svg: null,
     area_tracts: [],
     areas_active: false,
@@ -61,6 +65,11 @@ var CrimeMap = {
                     .style("stroke-width", "1")
                     .style("stroke", this.BORDER_COLORS)
                     .on("click", function(path, d) {
+                        // if the area only encompasses
+                        // one census tract it makes
+                        // no sense at all to zoom. Same for no colors in areas.
+                        if(d.id.split(",").length < 2  || !this.areas_active) return; 
+
                         if (this.previous_area) {
                             this.previous_area.classed("active", false);
                         }
@@ -144,7 +153,7 @@ var CrimeMap = {
                     .attr("id", function(d){ return "tract" + d.id; })
                     .attr("class", "tract")
                     .attr("d", path)
-                    .style("fill", this.DEFAULT_COLOR)
+                    .style("fill", this.TRACT_DEFAULT_COLOR)
                     .style("stroke-width", "1")
                     .style("stroke", this.BORDER_COLORS);
             drawOverlay();
@@ -161,8 +170,10 @@ var CrimeMap = {
     },
     color: function(data) {
         var number_of_shades = this.CHORO_COLORS.length;
-        var shades = [this.DEFAULT_COLOR];
-        shades.push.apply(shades, this.CHORO_COLORS);
+        var area_shades = [this.DEFAULT_COLOR];
+        area_shades.push.apply(area_shades, this.CHORO_COLORS);
+        var tract_shades = [this.TRACT_DEFAULT_COLOR];
+        tract_shades.push.apply(tract_shades, this.TRACT_CHORO_COLORS);
 
         var maxNumCrimesTracts = 0;
 
@@ -235,7 +246,7 @@ var CrimeMap = {
 
         var colorAreas = d3.scale.threshold()
             .domain(crimeNumbersAreas)
-            .range(shades);
+            .range(area_shades);
 
         this.svg.selectAll(".area")
         .style("fill", selectFill.bind({color:colorAreas,
@@ -244,7 +255,7 @@ var CrimeMap = {
         if (maxNumCrimesTracts < number_of_shades) { // we have too few crimes for the tract level view
             this.svg.selectAll(".tract")
             .style("fill", function(d) {
-                this.DEFAULT_COLOR;
+                this.TRACT_DEFAULT_COLOR;
             }.bind(this));
             this.tracts_active = false;
         } else {
@@ -258,7 +269,7 @@ var CrimeMap = {
 
             var colorTracts = d3.scale.threshold()
             .domain(crimeNumbersTracts)
-            .range(shades);
+            .range(tract_shades);
 
             this.svg.selectAll(".tract")
             .style("fill", selectFill.bind({color:colorTracts,
