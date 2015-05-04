@@ -29,15 +29,17 @@ var CrimeMap = {
         var makeLegend = function(shades, legend_numbers) {
             var colorNumbers = [];
             colorNumbers.push({color: shades[0],
-                               text: "0"});
+                               text: "0 crimes"});
             colorNumbers.push({color: shades[1],
                                text: "1 to " + 
-                               Math.ceil(legend_numbers[0])});
+                               Math.ceil(legend_numbers[0]) +
+                               " crimes"});
 
             for (var i = 1; i < shades.length - 1; i++) {
                 var text = [Math.ceil(legend_numbers[i- 1]),
                             "to", 
-                            Math.ceil(legend_numbers[i])].join(" ");
+                            Math.ceil(legend_numbers[i]),
+                            "crimes"].join(" ");
                 colorNumbers.push({color:shades[i],
                                    text: text});
             }
@@ -51,9 +53,9 @@ var CrimeMap = {
                     
             legendEntriesEnter.append("div")
                             .attr("class", "legendEntryColor")
-                            .attr("fill", function(d){return d.color;});
+                            .style("background", function(d){return d.color;});
 
-            legendEntriesEnter.append("div")
+            legendEntriesEnter.append("p")
                             .attr("class", "legendEntryText")
                             .text(function(d){return d.text;});
         }
@@ -155,7 +157,13 @@ var CrimeMap = {
                             .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
                     }.bind(this, path))
                     .on("mouseover", function(d) {
-                        return; // to be continued ...
+                        var descriptorName;
+                        if (d.properties.AREA_NAME) 
+                            descriptorName = d.properties.AREA_NAME;
+                        else
+                            descriptorName = "Tract " + d.id;
+                        d3.select("#mapDescriptorName")
+                            .text(descriptorName);
                     }.bind(this))
                     .on("mouseout", function(d) {
                         return; // to be continued ...
