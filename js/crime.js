@@ -1,10 +1,10 @@
 var RequestMaker = {
     _API_URL: "http://104.131.36.238/crimeAPI/",
     crime_list : function(startDate, endDate, offense, category, district, callback) {
-        this._crime_query(false, null, false, false, startDate, endDate, offense, category, district, callback);
+        this._crime_query(false, null, false, false, false, startDate, endDate, offense, category, district, callback);
     },
     crime_count : function(startDate, endDate, offense, category, district, callback) {
-        this._crime_query(true, null, false, false, startDate, endDate, offense, category, district, callback);
+        this._crime_query(true, null, false, false, false, startDate, endDate, offense, category, district, callback);
     },
     offense_list : function(callback) {
         this._query_list(this._API_URL + "offense/", {}, callback);
@@ -13,15 +13,18 @@ var RequestMaker = {
         this._query_list(this._API_URL + "category/", {}, callback);
     },
     crime_count_increment : function(increment, startDate, endDate, offense, category, district, callback) {
-        this._crime_query(true, increment, false, false, startDate, endDate, offense, category, district, callback);
+        this._crime_query(true, increment, false, false, false, startDate, endDate, offense, category, district, callback);
     },
     district_count : function(startDate, endDate, offense, category, callback) {
-        this._crime_query(true, null, true, false, startDate, endDate, offense, category, null, callback);
+        this._crime_query(true, null, true, false, false, startDate, endDate, offense, category, null, callback);
     },
     crime_count_area : function(startDate, endDate, offense, category, callback) {
-        this._crime_query(true, null, false, true, startDate, endDate, offense, category, null, callback);
+        this._crime_query(true, null, false, true, false, startDate, endDate, offense, category, null, callback);
     },
-    _crime_query : function (isCount, increment, isDistrictCount, isAreaCount, startDate, endDate, offense, category, district, callback) {
+    crime_report_delay : function(startDate, endDate, offense, category, district, callback) {
+        this._crime_query(true, null, false, false, true, startDate, endDate, offense, category, district, callback);
+    },
+    _crime_query : function (isCount, increment, isDistrictCount, isAreaCount, isDelayReport, startDate, endDate, offense, category, district, callback) {
         // as I added public facing helper functions, this function slowly
         // became a monster. I think it is a prime candidate for refactoring
         var queryDict = {}; 
@@ -40,7 +43,9 @@ var RequestMaker = {
             queryDict['category'] = category;
         }
         if (isCount) {
-            if (isAreaCount) 
+            if (isDelayReport)
+                this._query_detail(this._API_URL + "timeToReport/", queryDict, callback);
+            else if (isAreaCount) 
                 this._query_detail(this._API_URL + "countArea/", queryDict, callback);
             else if (!increment && !isDistrictCount)
                 this._query_detail(this._API_URL + "count/", queryDict, callback);
