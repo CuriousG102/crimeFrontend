@@ -10,7 +10,7 @@ var Graph1 = {
   xScaler: null,
 
   setupGraph: function() {
-    var margin = {top: 20, right: 30, bottom: 30, left: 55};
+    var margin = {top: 20, right: 30, bottom: 120, left: 55};
     this.inner_width = this.GRAPH_WIDTH - margin.left - margin.right;
     this.inner_height = this.GRAPH_HEIGHT - margin.top - margin.bottom;
 
@@ -30,7 +30,7 @@ var Graph1 = {
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     
     this.graph1.append("g")
-             .attr("class", "y axis")
+             .attr("class", "yAxis")
              .call(yAxis)
           .append("text")
              .attr("transform", "rotate(-90)")
@@ -64,6 +64,13 @@ var Graph1 = {
 
     var xAxis = d3.svg.axis()
     .scale(this.xScaler) 
+    .tickFormat(function (d) {
+      var months = ["Jan", "Feb", "March", "April", "May", "June", "July",
+                    "Aug", "Sep", "Oct", "Nov", "Dec"];
+      var date = new Date(d); 
+      return [months[date.getMonth()],
+                     date.getDate() + ",",
+                     date.getFullYear()].join(" ");})
     .orient("bottom");
 
     console.log(currentData);
@@ -75,16 +82,25 @@ var Graph1 = {
     var selectionEnter = selection
                           .enter();
 
+    this.graph1.select(".xAxis").remove();
+
     selectionEnter.append("rect")
             .attr("class", "bar")
             .attr("x", function(d) { return this.xScaler(d.date); }.bind(this))
             .attr("y", function(d) { return this.yScaler(d.count); }.bind(this))
             .attr("height", function(d) { return this.inner_height - this.yScaler(d.count); }.bind(this))
             .attr("width", this.xScaler.rangeBand());
-    /*selectionEnter.append("g")
-            .attr("class", "x axis")
+    this.graph1.append("g")
+            .attr("class", "xAxis")
             .attr("transform", "translate(0," + this.inner_height + ")")
-            .call(xAxis);*/
+            .call(xAxis)
+            .selectAll("text")  
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", function(d) {
+                return "rotate(-65)" 
+                });;
 
     // update bars
     selection
