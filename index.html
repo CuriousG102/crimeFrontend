@@ -17,10 +17,27 @@
     <link rel="stylesheet" href="css/map.css" type="text/css" />
   </head>
   <body>
-    <div id="map"></div>
-    <div id="mapLegend"></div>
-    <div id="slider"></div>
-    <button type="button" class="btn btn-primary" id="updateButton">Update Interactive</button>
-    <div class="list-group" id="categorySelector"></div>
+    <div class="row">
+      <div id="map" class="col-md-8"></div>
+      <div class="col-md-4">
+        <div class="row">
+          <div id="mapLegend" class="col-md-12"></div>
+        </div>
+        <div class="row" id="mapDescriptorRow">
+          <div id="mapDescriptor" class="col-md-12">
+            <p>Name</p>
+            <p id="mapDescriptorName"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <div id="slider"></div>
+        <button type="button" class="btn btn-primary" id="updateButton">Update Interactive</button>
+        <div class="list-group" id="categorySelector"></div>
+      </div>
+    </div>
+    
   <body>
 </html>
