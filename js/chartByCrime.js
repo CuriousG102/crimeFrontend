@@ -16,10 +16,11 @@ var Graph1 = {
 
     this.yScaler = d3.scale.linear()
             .range([this.inner_height, 0])
-            .domain([0, 400]); // change this
+            .domain([0, 500]);
 
     var yAxis = d3.svg.axis()
     .scale(this.yScaler)
+    .ticks(9)
     .orient("left");
 
     this.graph1 = d3.select(".graph1")
@@ -54,7 +55,8 @@ var Graph1 = {
                       });
     };
 
-    console.log(currentData);
+    // this.yScaler = this.yScaler
+    //                     .domain(0, 500);
 
     this.xScaler = d3.scale.ordinal() 
         .rangeRoundBands([0, this.inner_width], .1)
@@ -64,23 +66,25 @@ var Graph1 = {
     .scale(this.xScaler) 
     .orient("bottom");
 
-    // add x axis
-    this.graph1.append("g")
-             .attr("class", "x axis")
-             .attr("transform", "translate(0," + this.inner_height + ")")
-             .call(xAxis);
+    console.log(currentData);
 
     // add bars
     var selection = this.graph1.selectAll(".bar")
                     .data(currentData);
 
-    selection
-        .enter().append("rect")
-          .attr("class", "bar")
-          .attr("x", function(d) { return this.xScaler(d.date); }.bind(this))
-          .attr("y", function(d) { return this.yScaler(d.count); }.bind(this))
-          .attr("height", function(d) { return this.inner_height - this.yScaler(d.count); }.bind(this))
-          .attr("width", this.xScaler.rangeBand());
+    var selectionEnter = selection
+                          .enter();
+
+    selectionEnter.append("rect")
+            .attr("class", "bar")
+            .attr("x", function(d) { return this.xScaler(d.date); }.bind(this))
+            .attr("y", function(d) { return this.yScaler(d.count); }.bind(this))
+            .attr("height", function(d) { return this.inner_height - this.yScaler(d.count); }.bind(this))
+            .attr("width", this.xScaler.rangeBand());
+    /*selectionEnter.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + this.inner_height + ")")
+            .call(xAxis);*/
 
     // update bars
     selection
