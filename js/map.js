@@ -223,7 +223,16 @@ var CrimeMap = {
                     .attr("d", path)
                     .style("fill", this.TRACT_DEFAULT_COLOR)
                     .style("stroke-width", "1")
-                    .style("stroke", this.BORDER_COLORS);
+                    .style("stroke", this.BORDER_COLORS)
+                    .on("mouseover", function(d) {
+                        var descriptorName;
+                        if (d.properties.AREA_NAME) 
+                            descriptorName = d.properties.AREA_NAME;
+                        else
+                            descriptorName = "Tract " + d.id;
+                        d3.select("#mapDescriptorName")
+                            .text(descriptorName);
+                    }.bind(this));
             drawOverlay();
         }.bind(this, drawOverlay));
     },
