@@ -9,13 +9,13 @@
 }
 #mapLegend {
     height: 400px;
-    border-radius: 25px;
-    border: 2px solid #000;
+    /*border-radius: 25px;
+    border: 2px solid #000;*/
 }
 #mapDescriptor {
     height: 150px;
-    border-radius: 25px;
-    border: 2px solid #000;
+    /*border-radius: 25px;
+    border: 2px solid #000;*/
 }
 #mapDescriptorRow {
     margin-top: 30px;

@@ -88,7 +88,7 @@ var InteractiveController = {
                          return false; // keep the page from jumping up
                        };
         var catSelector = $("#categorySelector");
-        catSelector.append($('<a></a>', {'class': 'list-group-item catSelectorItem active', 
+        catSelector.append($('<li></li>', {'class': 'catSelectorItem active', 
                                          'href': '#',
                                          on: {
                                            click: catClick
@@ -96,7 +96,7 @@ var InteractiveController = {
                                         }).text("All").data('catID', null));
         var categories = reqMaker.category_list(function (catClick, err, resp) {
             for (var i = 0; i < resp.length; i++) {
-                this.append($('<a></a>', {'class': 'list-group-item catSelectorItem',
+                this.append($('<li></li>', {'class': 'catSelectorItem active',
                                          'href': '#',
                                          on: {
                                            click: catClick

@@ -1,6 +1,6 @@
 var CrimeMap = {
     WIDTH: 700,
-    HEIGHT: 600,
+    HEIGHT: 512,
     DEFAULT_COLOR: "rgb(255,255,178)",
     BORDER_COLORS: "#000",
     CHORO_COLORS: ['rgb(254,217,118)','rgb(254,178,76)',
