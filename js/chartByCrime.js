@@ -10,18 +10,9 @@ var Graph1 = {
   xScaler: null,
 
   setupGraph: function() {
-    var margin = {top: 20, right: 30, bottom: 120, left: 55};
+    var margin = {top: 20, right: 30, bottom: 120, left: 60};
     this.inner_width = this.GRAPH_WIDTH - margin.left - margin.right;
     this.inner_height = this.GRAPH_HEIGHT - margin.top - margin.bottom;
-
-    this.yScaler = d3.scale.linear()
-            .range([this.inner_height, 0])
-            .domain([0, 500]);
-
-    var yAxis = d3.svg.axis()
-    .scale(this.yScaler)
-    .ticks(9)
-    .orient("left");
 
     this.graph1 = d3.select(".graph1")
                     .attr("width", this.GRAPH_WIDTH)
@@ -29,16 +20,7 @@ var Graph1 = {
                   .append("g")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     
-    this.graph1.append("g")
-             .attr("class", "yAxis")
-             .call(yAxis)
-          .append("text")
-             .attr("transform", "rotate(-90)")
-             .attr("x", -(this.GRAPH_HEIGHT / 2))
-             .attr("y", -80)
-             .attr("dy", "4em")
-             .style("text-anchor", "end")
-             .text("Count");
+
 
   },
 
@@ -55,9 +37,31 @@ var Graph1 = {
                       });
     };
 
-    // this.yScaler = this.yScaler
-    //                     .domain(0, 500);
+    // make y-axis
+    this.yScaler = d3.scale.linear()
+            .range([this.inner_height, 0])
+            .domain([0, d3.max(data, function(d) { return d.number; })]);
 
+    var yAxis = d3.svg.axis()
+    .scale(this.yScaler)
+    .ticks(9)
+    .orient("left");
+
+    // get rid of pre-existing y-axis
+    this.graph1.select(".yAxis").remove();
+
+    this.graph1.append("g")
+         .attr("class", "yAxis")
+         .call(yAxis)
+      .append("text")
+         .attr("transform", "rotate(-90)")
+         .attr("x", -180)
+         .attr("y", -100)
+         .attr("dy", "4em")
+         .style("text-anchor", "end")
+         .text("Count");
+
+    // make x-axis
     this.xScaler = d3.scale.ordinal() 
         .rangeRoundBands([0, this.inner_width], .1)
         .domain(currentData.map(function(d) { return d.date; }));
@@ -82,6 +86,7 @@ var Graph1 = {
     var selectionEnter = selection
                           .enter();
 
+    // get rid of pre-existing x-axis
     this.graph1.select(".xAxis").remove();
 
     selectionEnter.append("rect")
