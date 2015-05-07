@@ -83,25 +83,28 @@ var InteractiveController = {
 
         var catClick = function(event) {
                          $(".catSelectorItem").removeClass("active");
-                         $(this).addClass("active");
+                         $(this).parent().addClass("active");
                          missionControl.update();
                          return false; // keep the page from jumping up
                        };
         var catSelector = $("#categorySelector");
-        catSelector.append($('<li></li>', {'class': 'catSelectorItem active', 
-                                         'href': '#',
-                                         on: {
-                                           click: catClick
-                                         }
-                                        }).text("All").data('catID', null));
+        var catItem = $('<li>', {'class': 'catSelectorItem active'})
+                            .append($('<a>', { 'href': '#',
+                                                on: {
+                                                  click: catClick
+                                                }
+                                              }).text("All").data('catID', null));
+        console.log(catItem);
+        catSelector.append(catItem);
         var categories = reqMaker.category_list(function (catClick, err, resp) {
             for (var i = 0; i < resp.length; i++) {
-                this.append($('<li></li>', {'class': 'catSelectorItem active',
-                                         'href': '#',
-                                         on: {
-                                           click: catClick
-                                         }
-                                        }).text(resp[i]['name']).data('catID', resp[i]['id']));
+                catItem = $('<li>', {'class': 'catSelectorItem'})
+                            .append($('<a>', { 'href': '#',
+                                                on: {
+                                                  click: catClick
+                                                }
+                                              }).text(resp[i]['name']).data('catID', resp[i]['id']));
+                this.append(catItem);
             }
         }.bind(catSelector, catClick));
     },
@@ -117,7 +120,7 @@ var InteractiveController = {
         for (var i = 0; i < this.clients.length; i++)
             this.clients[i](this.slider.data('daterangepicker').startDate.toDate(), 
                             this.slider.data('daterangepicker').endDate.toDate(), 
-                            $('.catSelectorItem.active').data('catID'));
+                            $('.catSelectorItem.active a').data('catID'));
     }
 };
 var missionControl;
