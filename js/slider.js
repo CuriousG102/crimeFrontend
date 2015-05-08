@@ -84,9 +84,14 @@ var InteractiveController = {
         var catClick = function(event) {
                          $(".catSelectorItem").removeClass("active");
                          $(this).parent().addClass("active");
+                         $("#categorySelectorButton")
+                         .text($('.catSelectorItem.active a').text())
+                            .append(' <span class="caret"></span>');
                          missionControl.update();
                          return false; // keep the page from jumping up
                        };
+        $("#categorySelectorButton").text("All")
+            .append(' <span class="caret"></span>');
         var catSelector = $("#categorySelector");
         var catItem = $('<li>', {'class': 'catSelectorItem active'})
                             .append($('<a>', { 'href': '#',
