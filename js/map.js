@@ -104,10 +104,10 @@ var CrimeMap = {
         d3.select("#zoomOut").on("click", this.reset.bind(this));
 
         var drawOverlay = function() {
-            d3.json("js/apd_areas_sample.topojson", function(error, areas_map) {
+            d3.json("js/apd_areas.topojson", function(error, areas_map) {
                 if (error) return console.error(error);
 
-                var areas = areas_map.objects.apd_areas_sample;
+                var areas = areas_map.objects.apd_areas;
                 var geojson = topojson.feature(areas_map, areas);
                 var center = d3.geo.centroid(geojson);
                 var scale = 150;
