@@ -90,7 +90,7 @@ var InteractiveController = {
                          missionControl.update();
                          return false; // keep the page from jumping up
                        };
-        $("#categorySelectorButton").text("All")
+        $("#categorySelectorButton").text("All Crimes")
             .append(' <span class="caret"></span>');
         var catSelector = $("#categorySelector");
         var catItem = $('<li>', {'class': 'catSelectorItem active'})
@@ -98,7 +98,7 @@ var InteractiveController = {
                                                 on: {
                                                   click: catClick
                                                 }
-                                              }).text("All").data('catID', null));
+                                              }).text("All Crimes").data('catID', null));
         console.log(catItem);
         catSelector.append(catItem);
         var categories = reqMaker.category_list(function (catClick, err, resp) {
