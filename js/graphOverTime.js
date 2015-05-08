@@ -19,8 +19,6 @@ var Graph1 = {
                     .attr("height", this.GRAPH_HEIGHT)
                   .append("g")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-    
-
 
   },
 
@@ -45,6 +43,7 @@ var Graph1 = {
     var yAxis = d3.svg.axis()
     .scale(this.yScaler)
     .ticks(9)
+//    .tickFormat(d3.format(",.0f"))
     .orient("left");
 
     // get rid of pre-existing y-axis
@@ -76,8 +75,6 @@ var Graph1 = {
                      date.getDate() + ",",
                      date.getFullYear()].join(" ");})
     .orient("bottom");
-
-    console.log(currentData);
 
     // add bars
     var selection = this.graph1.selectAll(".bar")
@@ -123,15 +120,14 @@ var Graph1 = {
   display: function(start, end, catID) {
 
     reqMaker.crime_count_increment(this.INCREMENT_NUM_HOURS, start, 
-                                   end, null, catID, 
-                                   null, 
+                                   end, null, catID, null, 
                                    this.drawGraph.bind(this, start, end, this.INCREMENT_NUM_HOURS));
   } 
 }
 
 $().ready(function () {
-    var theGraphObject = Object.create(Graph1);
-    theGraphObject.setupGraph();
-    missionControl.addClient(theGraphObject.display.bind(theGraphObject));
+    var theGraphObjectTime = Object.create(Graph1);
+    theGraphObjectTime.setupGraph();
+    missionControl.addClient(theGraphObjectTime.display.bind(theGraphObjectTime));
 });
 
