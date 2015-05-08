@@ -23,6 +23,7 @@ var CrimeMap = {
                          // in on the next area while setting other areas
                          // to not be classed as active in O(1) rather than
                          // O(n)
+    tract_crime_numbers: {},
     plotLegend: function(isArea) {
         var legendBox = d3.select("#mapLegend").html("");
 
@@ -82,6 +83,17 @@ var CrimeMap = {
             }
         }
     },
+
+    getCrimeNumFromID: function(id) {
+        var crimeNum = 0;
+        tract_arr = id.split(",");
+        for (var i = 0; i < tract_arr.length; i++)
+            if (this.tract_crime_numbers.hasOwnProperty(Number(tract_arr[i])))
+                crimeNum += this.tract_crime_numbers[Number(tract_arr[i])];
+
+        return crimeNum;
+    },
+
     draw: function() {
         var svg = d3.select("#map").append("svg")
                 .attr("width", this.WIDTH)
@@ -114,6 +126,8 @@ var CrimeMap = {
                 projection = d3.geo.mercator().center(center)
                     .scale(scale).translate(offset);
                 path = path.projection(projection);
+
+                
 
                 this.svg.selectAll(".area")
                     .data(geojson.features)
@@ -164,6 +178,9 @@ var CrimeMap = {
                             descriptorName = "Tract " + d.id;
                         d3.select("#mapDescriptorName")
                             .text(descriptorName);
+                        d3.select("#mapDescriptorNumber")
+                            .text([this.getCrimeNumFromID(d.id),
+                                   "Crimes"].join(" "));
                     }.bind(this))
                     .on("mouseout", function(d) {
                         return; // to be continued ...
@@ -232,6 +249,9 @@ var CrimeMap = {
                             descriptorName = "Tract " + d.id;
                         d3.select("#mapDescriptorName")
                             .text(descriptorName);
+                        d3.select("#mapDescriptorNumber")
+                            .text([this.getCrimeNumFromID(d.id),
+                                   "Crimes"].join(" "));
                     }.bind(this));
             drawOverlay();
         }.bind(this, drawOverlay));
@@ -246,7 +266,11 @@ var CrimeMap = {
 
         }.bind(this));
     },
-    color: function(data) {
+    color: function(data) { // spaghetti code at this point, needs a refactor
+        this.tract_crime_numbers = {};
+        for (tract_num in data)
+            if (data.hasOwnProperty(tract_num))
+                this.tract_crime_numbers[Number(tract_num)] = Number(data[tract_num])
         var number_of_shades = this.CHORO_COLORS.length;
         var area_shades = [this.DEFAULT_COLOR];
         area_shades.push.apply(area_shades, this.CHORO_COLORS);
