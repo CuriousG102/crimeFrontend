@@ -1,6 +1,3 @@
-.area.active {
-    visibility: hidden;
-}
 .clickableArea:hover {
     fill:rgb(255, 255, 240) !important; /* cringing at using important but worried about
                               D3's performance on mouseout and mouseover.
@@ -26,4 +23,19 @@
     margin-top: 10px;
 }
 .legendEntryText {
+}
+#mapPalette {
+    z-index: 0;
+}
+#zoomOut {
+    width: 50px;
+    height: 50px;
+
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-top: 30px;
+    margin-right: 650px;
+    z-index: 2;
+    visibility: hidden;
 }

@@ -98,8 +98,10 @@ var CrimeMap = {
         var svg = d3.select("#map").append("svg")
                 .attr("width", this.WIDTH)
                 .attr("height", this.HEIGHT)
+                .attr("id", "mapPalette")
                 .append("g");
         this.svg = svg;
+        d3.select("#zoomOut").on("click", this.reset.bind(this));
 
         var drawOverlay = function() {
             d3.json("js/apd_areas_sample.topojson", function(error, areas_map) {
@@ -143,18 +145,21 @@ var CrimeMap = {
                         // if the area only encompasses
                         // one census tract it makes
                         // no sense at all to zoom. Same for no colors in areas.
+                        
                         if(d.id.split(",").length < 2  || !this.areas_active) return; 
 
                         this.plotLegend(false);
                         if (this.previous_area) {
-                            this.previous_area.classed("active", false);
+                            this.previous_area.style("visibility", "visible");
                         }
 
+                        d3.select("#zoomOut").style("visibility", "visible");
                         // regex replace below is necessary to escape
                         // special characters present in the id
                         this.previous_area = d3.select("#area" + d.id.replace(/\./g, "\\.")
                                                                      .replace(/,/g, "\\,"))
-                                               .classed("active", true);
+                                               .classed("active", true)
+                                               .style("visibility", "hidden");
 
                         // http://bl.ocks.org/mbostock/4699541
                         var bounds = path.bounds(d),
@@ -257,6 +262,7 @@ var CrimeMap = {
         }.bind(this, drawOverlay));
     },
     display: function(start, end, catNum) {
+        this.reset();
         reqMaker.district_count(start, end, null, catNum, function(err, resp) {
             var data = {};
             for (var i = 0; i < resp.length; i++)
@@ -381,6 +387,15 @@ var CrimeMap = {
                                             data:data}));
         }        
 
+    },
+    reset: function() {
+        d3.select("#zoomOut").style("visibility", "hidden");
+        d3.selectAll(".area").style("visibility", "visible");
+        this.plotLegend(true);
+        this.svg.transition()
+        .duration(750)
+        .style("stroke-width", "1.5px")
+        .attr("transform", "");
     }
 }
 
