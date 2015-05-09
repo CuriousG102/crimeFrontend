@@ -213,8 +213,7 @@ var CrimeMap = {
                         this.area_tracts.push(tracts);
                     }
                 }
-
-
+                missionControl.addClient(this.display.bind(this));
             }.bind(this));
         }.bind(this);
 
@@ -434,5 +433,4 @@ $().ready(function () {
     var crimeMap = Object.create(CrimeMap);
     crimeMap.draw.bind(crimeMap)();
     d3.select(window).on('resize', crimeMap.resize.bind(crimeMap));
-    missionControl.addClient(crimeMap.display.bind(crimeMap));
 });
