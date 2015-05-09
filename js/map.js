@@ -102,11 +102,24 @@ var CrimeMap = {
         var height = this.MAP_RATIO * width;
         console.log(height);
 
+        var tip = d3.tip()
+            .attr("class", "map-tip")
+            .html(function(d) {
+                var descriptorName;
+                        if (d.properties.AREA_NAME) 
+                            descriptorName = d.properties.AREA_NAME;
+                        else
+                            descriptorName = "Tract " + d.id;
+                        return [descriptorName,
+                                this.getCrimeNumFromID(d.id)+" Crimes"].join("<br>");
+            }.bind(this));
+
         var svg = d3.select("#map").append("svg")
                 .attr("width", width+'px')
                 .attr("height", height+'px')
                 .attr("id", "mapPalette")
-                .append("g");
+                .append("g")
+                .call(tip);
         this.svg = svg;
         d3.select("#zoomOut").on("click", this.reset.bind(this));
 
@@ -182,21 +195,8 @@ var CrimeMap = {
                             .style("stroke-width", 1.5 / scale + "px")
                             .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
                     }.bind(this))
-                    .on("mouseover", function(d) {
-                        var descriptorName;
-                        if (d.properties.AREA_NAME) 
-                            descriptorName = d.properties.AREA_NAME;
-                        else
-                            descriptorName = "Tract " + d.id;
-                        d3.select("#mapDescriptorName")
-                            .text(descriptorName);
-                        d3.select("#mapDescriptorNumber")
-                            .text([this.getCrimeNumFromID(d.id),
-                                   "Crimes"].join(" "));
-                    }.bind(this))
-                    .on("mouseout", function(d) {
-                        return; // to be continued ...
-                    }.bind(this));
+                    .on("mouseover", tip.show)
+                    .on("mouseout", tip.hide);
 
                 // run this last, because it may be slow
                 // map draw has priority. Also, this should be its
@@ -256,18 +256,8 @@ var CrimeMap = {
                     .style("fill", this.TRACT_DEFAULT_COLOR)
                     .style("stroke-width", "1")
                     .style("stroke", this.BORDER_COLORS)
-                    .on("mouseover", function(d) {
-                        var descriptorName;
-                        if (d.properties.AREA_NAME) 
-                            descriptorName = d.properties.AREA_NAME;
-                        else
-                            descriptorName = "Tract " + d.id;
-                        d3.select("#mapDescriptorName")
-                            .text(descriptorName);
-                        d3.select("#mapDescriptorNumber")
-                            .text([this.getCrimeNumFromID(d.id),
-                                   "Crimes"].join(" "));
-                    }.bind(this));
+                    .on("mouseover", tip.show)
+                    .on("mouseout", tip.hide);
             drawOverlay();
         }.bind(this, drawOverlay));
     },
