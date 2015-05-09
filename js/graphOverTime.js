@@ -164,10 +164,7 @@ var Graph1 = {
     graph1.selectAll('rect')
           .attr('width', width);
 
-    graph1.selectAll("rect.percent")
-          .attr("width", function(d) { return x(d.percent); });
-
-    graph1.select('x.axis.bottom').call(xAxis.orient('bottom'));     
+    graph1.select('.x.axis.bottom').call(xAxis.orient('bottom'));     
   }
 }
 
