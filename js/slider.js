@@ -101,7 +101,7 @@ var InteractiveController = {
                                               }).text("All Crimes").data('catID', null));
         console.log(catItem);
         catSelector.append(catItem);
-        var categories = reqMaker.category_list(function (catClick, err, resp) {
+        reqMaker.category_list(function (catClick, err, resp) {
             for (var i = 0; i < resp.length; i++) {
                 catItem = $('<li>', {'class': 'catSelectorItem'})
                             .append($('<a>', { 'href': '#',
@@ -127,6 +127,7 @@ var InteractiveController = {
                             this.slider.data('daterangepicker').endDate.toDate(), 
                             $('.catSelectorItem.active a').data('catID'));
     }
+
 };
 var missionControl;
 
