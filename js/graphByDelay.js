@@ -22,9 +22,10 @@ var Graph2 = {
   setupGraph: function() {
     var wAndH = this.getWidthsAndHeights();    
 
+    // add tooltips
     this.tip = d3.tip()
     .attr('class', 'graph-tip')
-    .html(function(d) { return "<strong>Delay:</strong> <span style='color:red'>" + d.delay + "</span>"; });
+    .html(function(d) { return "<strong>Delay:</strong> <span style='color:#f03b20'>" + d3.round(d.delay, 2) + "</span>"; });
 
     this.graph2 = d3.select("#graph2")
                     .attr("width", wAndH.width)

@@ -24,9 +24,10 @@ var Graph1 = {
   setupGraph: function() {
     var wAndH = this.getWidthsAndHeights();    
 
+    // add tooltips
     this.tip = d3.tip()
     .attr('class', 'graph-tip')
-    .html(function(d) { return "<strong>Count:</strong> <span style='color:red'>" + d.count + "</span>"; });
+    .html(function(d) { return "<strong>Count:</strong> <span style='color:#f03b20'>" + d.count + "</span>"; });
 
     this.graph1 = d3.select("#graph1")
                     .attr("width", wAndH.width)

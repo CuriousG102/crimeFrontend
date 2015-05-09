@@ -12,12 +12,24 @@
 	fill: #253494;
 }
 
+#graph1 rect:hover {
+  fill: #6671B4;
+}
+
 #graph2 rect {
 	fill: #2c7fb8;
 }
 
+#graph2 rect:hover {
+  fill: #6BA5CD;
+}
+
 #graph3 rect {
 	fill: #41b6c4;
+}
+
+#graph3 rect:hover {
+  fill: #7ACCD6;
 }
 
 .axis text {
@@ -56,5 +68,9 @@
   color: rgba(0, 0, 0, 0.8);
   content: "\25BC";
   position: absolute;
+  text-align: center;
+}
+
+.graphTitle {
   text-align: center;
 }
