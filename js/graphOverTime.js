@@ -123,7 +123,7 @@ var Graph1 = {
             .attr("x", function(d) { return this.xScaler(d.date); }.bind(this))
             .attr("y", function(d) { return this.yScaler(d.count); }.bind(this))
             .attr("height", function(d) { return inner_height - this.yScaler(d.count); }.bind(this))
-            .attr("width", this.xScaler.rangeBand());
+            .attr("width", this.xScaler.rangeBand())
             .on("mouseover", this.tip.show.bind(this))
             .on("mouseout", this.tip.hide);
     this.graph1.append("g")
