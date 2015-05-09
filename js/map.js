@@ -1,6 +1,4 @@
 var CrimeMap = {
-    WIDTH: 700,
-    HEIGHT: 512,
     DEFAULT_COLOR: "rgb(255,255,178)",
     BORDER_COLORS: "#000",
     CHORO_COLORS: ['rgb(254,217,118)','rgb(254,178,76)',
@@ -24,6 +22,8 @@ var CrimeMap = {
                          // to not be classed as active in O(1) rather than
                          // O(n)
     tract_crime_numbers: {},
+    MAP_RATIO: 0.75,
+    
     plotLegend: function(isArea) {
         var legendBox = d3.select("#mapLegend").html("");
 
@@ -95,9 +95,13 @@ var CrimeMap = {
     },
 
     draw: function() {
+        var width = parseInt(d3.select('#map').style('width'));
+        var height = this.MAP_RATIO * width;
+        console.log(height);
+
         var svg = d3.select("#map").append("svg")
-                .attr("width", this.WIDTH)
-                .attr("height", this.HEIGHT)
+                .attr("width", width)
+                .attr("height", height)
                 .attr("id", "mapPalette")
                 .append("g");
         this.svg = svg;
@@ -111,7 +115,7 @@ var CrimeMap = {
                 var geojson = topojson.feature(areas_map, areas);
                 var center = d3.geo.centroid(geojson);
                 var scale = 150;
-                var offset = [this.WIDTH/2, this.HEIGHT/2];
+                var offset = [width/2, height/2];
                 var projection = d3.geo.mercator().scale(scale).center(center)
                     .translate(offset);
 
@@ -119,11 +123,11 @@ var CrimeMap = {
 
 
                 var bounds  = path.bounds(geojson);
-                var hscale  = scale*this.WIDTH  / (bounds[1][0] - bounds[0][0]);
-                var vscale  = scale*this.HEIGHT / (bounds[1][1] - bounds[0][1]);
+                var hscale  = scale*width  / (bounds[1][0] - bounds[0][0]);
+                var vscale  = scale*height / (bounds[1][1] - bounds[0][1]);
                 var scale   = (hscale < vscale) ? hscale : vscale;
-                var offset  = [this.WIDTH - (bounds[0][0] + bounds[1][0])/2,
-                               this.HEIGHT - (bounds[0][1] + bounds[1][1])/2];
+                var offset  = [width - (bounds[0][0] + bounds[1][0])/2,
+                               height - (bounds[0][1] + bounds[1][1])/2];
 
                 projection = d3.geo.mercator().center(center)
                     .scale(scale).translate(offset);
@@ -167,8 +171,8 @@ var CrimeMap = {
                             dy = bounds[1][1] - bounds[0][1],
                             x = (bounds[0][0] + bounds[1][0]) / 2,
                             y = (bounds[0][1] + bounds[1][1]) / 2,
-                            scale = .9 / Math.max(dx / this.WIDTH, dy / this.HEIGHT),
-                            translate = [this.WIDTH / 2 - scale * x, this.HEIGHT / 2 - scale * y];
+                            scale = .9 / Math.max(dx / width, dy / height),
+                            translate = [width / 2 - scale * x, height / 2 - scale * y];
 
                         this.svg.transition()
                             .duration(750)
@@ -218,23 +222,23 @@ var CrimeMap = {
             var geojson = topojson.feature(tracts_map, tracts);
             var center = d3.geo.centroid(geojson);
             var scale = 150;
-            var offset = [this.WIDTH/2, this.HEIGHT/2];
+            var offset = [width/2, height/2];
             var projection = d3.geo.mercator().scale(scale).center(center)
                 .translate(offset);
 
             var path = d3.geo.path().projection(projection);
             var bounds  = path.bounds(geojson);
-            var hscale  = scale*this.WIDTH  / (bounds[1][0] - bounds[0][0]);
-            var vscale  = scale*this.HEIGHT / (bounds[1][1] - bounds[0][1]);
+            var hscale  = scale*width  / (bounds[1][0] - bounds[0][0]);
+            var vscale  = scale*height / (bounds[1][1] - bounds[0][1]);
             var scale   = (hscale < vscale) ? hscale : vscale;
-            var offset  = [this.WIDTH - (bounds[0][0] + bounds[1][0])/2,
-                           this.HEIGHT - (bounds[0][1] + bounds[1][1])/2];
+            var offset  = [width - (bounds[0][0] + bounds[1][0])/2,
+                           height - (bounds[0][1] + bounds[1][1])/2];
 
             projection = d3.geo.mercator().center(center)
                 .scale(scale).translate(offset);
             path = path.projection(projection);
 
-            svg.append("rect").attr('width', this.WIDTH).attr('height', this.HEIGHT)
+            svg.append("rect").attr('width', width).attr('height', height)
                     .style('stroke', 'black').style('fill', 'none');
 
             svg.selectAll(".tract")
@@ -396,6 +400,11 @@ var CrimeMap = {
         .duration(750)
         .style("stroke-width", "1.5px")
         .attr("transform", "");
+    },
+    resize: function() {
+        var width = parseInt(d3.select('#map').style('width'));
+        var height = width * this.MAP_RATIO;
+
     }
 }
 
