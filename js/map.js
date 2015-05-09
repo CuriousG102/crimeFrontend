@@ -41,7 +41,7 @@ var CrimeMap = {
                             "to", 
                             Math.ceil(legend_numbers[i]),
                             "crimes"].join(" ");
-                colorNumbers.push({color:shades[i],
+                colorNumbers.push({color:shades[i+1],
                                    text: text});
             }
 
