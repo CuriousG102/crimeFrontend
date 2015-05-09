@@ -3,7 +3,11 @@
 }
 
 .graph2 rect {
-	fill: #253494;
+	fill: #2c7fb8;
+}
+
+.graph3 rect {
+	fill: #41b6c4;
 }
 
 .axis text {

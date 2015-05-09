@@ -42,9 +42,20 @@ var Graph1 = {
 
     var yAxis = d3.svg.axis()
     .scale(this.yScaler)
-    .ticks(9)
-//    .tickFormat(d3.format(",.0f"))
+    .ticks(11)
     .orient("left");
+
+    // if the max value is 8, set ticks so there are no decimals
+    if (d3.max(currentData, function(d) { return d.count; }) <= 9) {
+     this.yScaler = d3.scale.linear()
+              .range([this.inner_height, 0])
+              .domain([0, 9]);
+
+      var yAxis = d3.svg.axis()
+      .scale(this.yScaler)
+      .tickValues([0,1,2,3,4,5,6,7,8,9])
+      .orient("left");
+    };
 
     // get rid of pre-existing y-axis
     this.graph1.select(".yAxis").remove();
