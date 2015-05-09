@@ -23,9 +23,9 @@ var CrimeMap = {
                          // O(n)
     tract_crime_numbers: {},
     MAP_RATIO: 0.75,
-    bounds: null,
     projection: null,
     path: null,
+    geojson: null,
 
     plotLegend: function(isArea) {
         var legendBox = d3.select("#mapLegend").html("");
@@ -137,7 +137,7 @@ var CrimeMap = {
 
                 var path = d3.geo.path().projection(projection);
 
-
+                this.geojson = geojson;
                 var bounds  = path.bounds(geojson);
                 var hscale  = scale*width  / (bounds[1][0] - bounds[0][0]);
                 var vscale  = scale*height / (bounds[1][1] - bounds[0][1]);
@@ -231,7 +231,6 @@ var CrimeMap = {
 
             var path = d3.geo.path().projection(projection);
             var bounds  = path.bounds(geojson);
-            this.bounds = bounds;
             var hscale  = scale*width  / (bounds[1][0] - bounds[0][0]);
             var vscale  = scale*height / (bounds[1][1] - bounds[0][1]);
             var scale   = (hscale < vscale) ? hscale : vscale;
@@ -401,14 +400,25 @@ var CrimeMap = {
         var scale = 150;
         var width = parseInt(d3.select('#map').style('width'));
         var height = width * this.MAP_RATIO;
-        var hscale  = scale*width  / (this.bounds[1][0] - this.bounds[0][0]);
-        var vscale  = scale*height / (this.bounds[1][1] - this.bounds[0][1]);
+
+        var center = d3.geo.centroid(this.geojson);
+        var scale = 150;
+        var offset = [width/2, height/2];
+        var projection = d3.geo.mercator().scale(scale).center(center)
+            .translate(offset);
+
+        var path = d3.geo.path().projection(projection);
+        var bounds  = path.bounds(this.geojson);
+        var hscale  = scale*width  / (bounds[1][0] - bounds[0][0]);
+        var vscale  = scale*height / (bounds[1][1] - bounds[0][1]);
         var scale   = (hscale < vscale) ? hscale : vscale;
-        var offset  = [width - (this.bounds[0][0] + this.bounds[1][0])/2,
-                       height - (this.bounds[0][1] + this.bounds[1][1])/2];
+        var offset  = [width - (bounds[0][0] + bounds[1][0])/2,
+                       height - (bounds[0][1] + bounds[1][1])/2];
         this.projection
             .translate(offset)
             .scale(scale);
+
+        this.path = path.projection(this.projection);
 
         d3.select("#mapPalette")
             .attr("width", width+'px')
