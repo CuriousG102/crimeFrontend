@@ -210,10 +210,6 @@ var Graph1 = {
             .attr("height", function(d) { return this.inner_height - this.yScaler(d.count); }.bind({inner_height:wAndH.inner_height,
                                                                                                   yScaler:this.yScaler}))
             .attr("width", this.xScaler.rangeBand());
-
-   
-        
-      
   }
 }
 

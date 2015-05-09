@@ -1,3 +1,13 @@
+#graph1, #graph2, #graph3 {
+	position: relative;
+}
+
+#noDataMsg{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+}
+
 #graph1 rect {
 	fill: #253494;
 }
@@ -25,4 +35,4 @@
 	fill: none;
 	stroke: black;
 	stroke-width: 1;
-} 
+}
