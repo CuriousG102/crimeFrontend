@@ -207,5 +207,5 @@ $().ready(function () {
     var theGraphObjectTime = Object.create(Graph1);
     theGraphObjectTime.setupGraph();
     missionControl.addClient(theGraphObjectTime.display.bind(theGraphObjectTime));
-    d3.select(window).on('resize', theGraphObjectTime.resize.bind(theGraphObjectTime));
+    d3.select(window).on('resize.graphOverTime', theGraphObjectTime.resize.bind(theGraphObjectTime));
 });

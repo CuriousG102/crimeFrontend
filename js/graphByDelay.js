@@ -187,6 +187,6 @@ $().ready(function () {
     var theGraphObjectDelay = Object.create(Graph2);
     theGraphObjectDelay.setupGraph();
     missionControl.addClient(theGraphObjectDelay.display.bind(theGraphObjectDelay));
-    d3.select(window).on('resize', theGraphObjectDelay.resize.bind(theGraphObjectDelay));
+    d3.select(window).on('resize.graphByDelay', theGraphObjectDelay.resize.bind(theGraphObjectDelay));
 });
 

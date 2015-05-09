@@ -145,6 +145,7 @@ var Graph3 = {
   },
 
   resize: function() {
+    console.log("see");
     if (!this.yAxis) return; // drawGraph hasn't been run yet
     var wAndH = this.getWidthsAndHeights();
     d3.select("#graph3")
@@ -199,6 +200,6 @@ $().ready(function () {
     var theGraphObjectArea = Object.create(Graph3);
     theGraphObjectArea.setupGraph();
     missionControl.addClient(theGraphObjectArea.display.bind(theGraphObjectArea));
-    d3.select(window).on('resize', theGraphObjectArea.resize.bind(theGraphObjectArea));
+    d3.select(window).on('resize.graphByArea', theGraphObjectArea.resize.bind(theGraphObjectArea));
 });
 
