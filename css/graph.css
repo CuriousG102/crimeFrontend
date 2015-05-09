@@ -1,0 +1,28 @@
+.graph1 rect {
+	fill: #253494;
+}
+
+.graph2 rect {
+	fill: #2c7fb8;
+}
+
+.graph3 rect {
+	fill: #41b6c4;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.domain {
+	fill: none;
+	stroke: black;
+	stroke-width: 1;
+} 
