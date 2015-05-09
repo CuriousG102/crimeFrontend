@@ -4,9 +4,14 @@ var Graph1 = {
   RATIO: 5/6,
   graph1: null,
   MARGIN: {top: 20, right: 30, bottom: 120, left: 60},
+  yScaler: null,
+  yAxis: null,
+  xScaler: null,
+  xAxis: null,
 
   getWidthsAndHeights: function() {
     var width = parseInt(d3.select("#graph1Container").style("width"));
+    console.log(width);
     var height = this.RATIO * width;
     var inner_width = width - this.MARGIN.left - this.MARGIN.right;
     var inner_height = height - this.MARGIN.top - this.MARGIN.bottom;
@@ -26,6 +31,8 @@ var Graph1 = {
                     .attr("transform", 
                           "translate(" + this.MARGIN.left 
                             + "," + this.MARGIN.top + ")");
+    this.yScaler = d3.scale.linear()
+              .range([wAndH.inner_height, 0]);
 
   },
 
@@ -33,8 +40,6 @@ var Graph1 = {
     var wAndH = this.getWidthsAndHeights();
     var inner_width = wAndH.inner_width;
     var inner_height = wAndH.inner_height;
-
-    var width = parseInt(d3.select("#graph2Container").style("width"), 10);
 
     var currentData = [];
     var currentDay = start;
@@ -49,9 +54,10 @@ var Graph1 = {
     };
 
     // make y-axis
-    var yScaler = d3.scale.linear()
-            .range([inner_height, 0])
+    this.yScaler = this.yScaler
             .domain([0, d3.max(data, function(d) { return d.number; })]);
+
+    var yScaler = this.yScaler;
 
     var yAxis = d3.svg.axis()
     .scale(yScaler)
@@ -69,6 +75,8 @@ var Graph1 = {
       .tickValues([0,1,2,3,4,5,6,7,8,9])
       .orient("left");
     };
+
+    this.yAxis = yAxis;
 
     // get rid of pre-existing y-axis
     this.graph1.select(".yAxis").remove();
@@ -89,6 +97,8 @@ var Graph1 = {
         .rangeRoundBands([0, inner_width], .1)
         .domain(currentData.map(function(d) { return d.date; }));
 
+    this.xScaler = xScaler;
+
     var xAxis = d3.svg.axis()
     .scale(xScaler) 
     .tickFormat(function (d) {
@@ -99,6 +109,8 @@ var Graph1 = {
                      date.getDate() + ",",
                      date.getFullYear()].join(" ");})
     .orient("bottom");
+
+    this.xAxis = xAxis;
 
     // add bars
     var selection = this.graph1.selectAll(".bar")
@@ -151,23 +163,57 @@ var Graph1 = {
   },
 
   resize: function() {
-    var width = parseInt(d3.select("#graph1Container").style("width"));
-    var height = this.RATIO * width;
-    var inner_width = width - this.MARGIN.left - this.MARGIN.right;
-    var inner_height = height - this.MARGIN.top - this.MARGIN.bottom;
+    if (!this.yAxis) return; // drawGraph hasn't been run yet
+    var wAndH = this.getWidthsAndHeights();
+    d3.select("#graph1")
+      .attr("width", wAndH.width)
+      .attr("height", wAndH.height);
 
-    xScaler.range([0, width]);
-    d3.select(this.graph1.node().parentNode)
-        .style("height", (y.rangeExtent()[1] + this.MARGIN.top + this.MARGIN.bottom) + 'px')
-        .style('width', (width + this.MARGIN.left + this.MARGIN.right) + 'px');
+    this.yScaler = this.yScaler.range([wAndH.inner_height, 0])
+    this.yAxis = this.yAxis
+                .scale(this.yScaler);
 
-    graph1.selectAll('rect')
-          .attr('width', width);
+    this.graph1.select(".yAxis").remove();
 
-    graph1.selectAll("rect.percent")
-          .attr("width", function(d) { return x(d.percent); });
+    this.graph1.append("g")
+         .attr("class", "yAxis")
+         .call(this.yAxis)
+      .append("text")
+         .attr("transform", "rotate(-90)")
+         .attr("x", -180)
+         .attr("y", -100)
+         .attr("dy", "4em")
+         .style("text-anchor", "end")
+         .text("Count");
 
-    graph1.select('x.axis.bottom').call(xAxis.orient('bottom'));     
+    this.xScaler = this.xScaler
+              .rangeRoundBands([0, wAndH.inner_width], .1);
+
+    this.xAxis = this.xAxis.scale(this.xScaler);
+
+    this.graph1.select(".xAxis").remove();
+
+    this.graph1.append("g")
+            .attr("class", "xAxis")
+            .attr("transform", "translate(0," + wAndH.inner_height + ")")
+            .call(this.xAxis)
+            .selectAll("text")  
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", function(d) {
+                return "rotate(-65)" 
+                });;
+    d3.selectAll("#graph1 .bar")
+            .attr("x", function(d) { return this.xScaler(d.date); }.bind({xScaler:this.xScaler}))
+            .attr("y", function(d) { return this.yScaler(d.count); }.bind({yScaler:this.yScaler}))
+            .attr("height", function(d) { return this.inner_height - this.yScaler(d.count); }.bind({inner_height:wAndH.inner_height,
+                                                                                                  yScaler:this.yScaler}))
+            .attr("width", this.xScaler.rangeBand());
+
+   
+        
+      
   }
 }
 
