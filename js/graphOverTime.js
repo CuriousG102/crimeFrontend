@@ -8,7 +8,7 @@ var Graph1 = {
   yAxis: null,
   xScaler: null,
   xAxis: null,
-  tip:null,
+  tip: null,
 
   getWidthsAndHeights: function() {
     var width = parseInt(d3.select("#graph1Container").style("width"));
@@ -26,7 +26,7 @@ var Graph1 = {
 
     this.tip = d3.tip()
     .attr('class', 'graph-tip')
-    .html(function(d) { return "<strong>Count:</strong> <span style='color:red'>" + d.count + "</span>"; })
+    .html(function(d) { return "<strong>Count:</strong> <span style='color:red'>" + d.count + "</span>"; });
 
     this.graph1 = d3.select("#graph1")
                     .attr("width", wAndH.width)
@@ -159,7 +159,6 @@ var Graph1 = {
   },
 
   resize: function() {
-    console.log("resize");
 
     if (!this.yAxis) return; // drawGraph hasn't been run yet
     var wAndH = this.getWidthsAndHeights();

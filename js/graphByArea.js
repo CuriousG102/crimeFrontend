@@ -6,6 +6,7 @@ var Graph3 = {
   yAxis: null,
   xScaler: null,
   xAxis: null,
+  tip: null,
 
   getWidthsAndHeights: function() {
     var width = parseInt(d3.select("#graph3Container").style("width"));
@@ -21,13 +22,18 @@ var Graph3 = {
   setupGraph: function() {
     var wAndH = this.getWidthsAndHeights();    
 
+    this.tip = d3.tip()
+    .attr('class', 'graph-tip')
+    .html(function(d) { return "<strong>Count:</strong> <span style='color:red'>" + d.count + "</span>"; });
+
     this.graph3 = d3.select("#graph3")
                     .attr("width", wAndH.width)
                     .attr("height", wAndH.height)
                   .append("g")
                     .attr("transform", 
                           "translate(" + this.MARGIN.left 
-                            + "," + this.MARGIN.top + ")");
+                            + "," + this.MARGIN.top + ")")
+                    .call(this.tip);
 
     this.yScaler = d3.scale.linear()
                   .range([wAndH.inner_height, 0]);
@@ -38,8 +44,6 @@ var Graph3 = {
     var inner_width = wAndH.inner_width;
     var inner_height = wAndH.inner_height;
 
-    var width = parseInt(d3.select("#graph3Container").style("width"), 10)
-    
     var currentData = [];
     for (var key in data) {
       if (data.hasOwnProperty(key) && key != "") {
@@ -112,7 +116,9 @@ var Graph3 = {
             .attr("x", function(d) { return this.xScaler(d.name); }.bind(this))
             .attr("y", function(d) { return this.yScaler(d.count); }.bind(this))
             .attr("height", function(d) { return inner_height - this.yScaler(d.count); }.bind(this))
-            .attr("width", this.xScaler.rangeBand());
+            .attr("width", this.xScaler.rangeBand())
+            .on("mouseover", this.tip.show.bind(this))
+            .on("mouseout", this.tip.hide);
     this.graph3.append("g")
             .attr("class", "xAxis")
             .attr("transform", "translate(0," + inner_height + ")")
@@ -145,7 +151,6 @@ var Graph3 = {
   },
 
   resize: function() {
-    console.log("see");
     if (!this.yAxis) return; // drawGraph hasn't been run yet
     var wAndH = this.getWidthsAndHeights();
     d3.select("#graph3")

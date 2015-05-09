@@ -6,6 +6,7 @@ var Graph2 = {
   yAxis: null,
   xScaler: null,
   xAxis: null,
+  tip: null,
 
   getWidthsAndHeights: function() {
     var width = parseInt(d3.select("#graph2Container").style("width"));
@@ -21,13 +22,18 @@ var Graph2 = {
   setupGraph: function() {
     var wAndH = this.getWidthsAndHeights();    
 
+    this.tip = d3.tip()
+    .attr('class', 'graph-tip')
+    .html(function(d) { return "<strong>Delay:</strong> <span style='color:red'>" + d.delay + "</span>"; });
+
     this.graph2 = d3.select("#graph2")
                     .attr("width", wAndH.width)
                     .attr("height", wAndH.height)
                   .append("g")
                     .attr("transform", 
                           "translate(" + this.MARGIN.left 
-                            + "," + this.MARGIN.top + ")");
+                            + "," + this.MARGIN.top + ")")
+                    .call(this.tip);
     this.yScaler = d3.scale.linear()
                   .range([wAndH.inner_height, 0]);
 
@@ -98,7 +104,9 @@ var Graph2 = {
             .attr("x", function(d) { return this.xScaler(d.name); }.bind(this))
             .attr("y", function(d) { return this.yScaler(d.delay); }.bind(this))
             .attr("height", function(d) { return inner_height - this.yScaler(d.delay); }.bind(this))
-            .attr("width", this.xScaler.rangeBand());
+            .attr("width", this.xScaler.rangeBand())
+            .on("mouseover", this.tip.show.bind(this))
+            .on("mouseout", this.tip.hide);
     this.graph2.append("g")
             .attr("class", "xAxis")
             .attr("transform", "translate(0," + inner_height + ")")
@@ -131,7 +139,6 @@ var Graph2 = {
   },
 
   resize: function() {
-    console.log("resize");
 
     if (!this.yAxis) return; // drawGraph hasn't been run yet
     var wAndH = this.getWidthsAndHeights();
