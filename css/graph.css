@@ -1,12 +1,22 @@
-.graph1 rect {
+#graph1, #graph2, #graph3 {
+	position: relative;
+}
+
+#noDataMsg{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+}
+
+#graph1 rect {
 	fill: #253494;
 }
 
-.graph2 rect {
+#graph2 rect {
 	fill: #2c7fb8;
 }
 
-.graph3 rect {
+#graph3 rect {
 	fill: #41b6c4;
 }
 
@@ -25,4 +35,26 @@
 	fill: none;
 	stroke: black;
 	stroke-width: 1;
-} 
+}
+
+.graph-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
