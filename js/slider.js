@@ -76,10 +76,7 @@ var InteractiveController = {
 
         this.slider.on("apply.daterangepicker", function(ev, picker) {
             this.update();
-            return false;
         }.bind(this));
-
-        this.slider.on()
 
         var catClick = function(event) {
                          $(".catSelectorItem").removeClass("active");
@@ -87,8 +84,7 @@ var InteractiveController = {
                          $("#categorySelectorButton")
                          .text($('.catSelectorItem.active a').text())
                             .append(' <span class="caret"></span>');
-                         missionControl.update();
-                         return false; // keep the page from jumping up
+                         missionControl.update(); // keep the page from jumping up
                        };
         $("#categorySelectorButton").text("All Crimes")
             .append(' <span class="caret"></span>');
