@@ -23,6 +23,9 @@ var CrimeMap = {
                          // O(n)
     tract_crime_numbers: {},
     MAP_RATIO: 0.75,
+    bounds: null,
+    projection: null,
+    path: null,
     
     plotLegend: function(isArea) {
         var legendBox = d3.select("#mapLegend").html("");
@@ -100,8 +103,8 @@ var CrimeMap = {
         console.log(height);
 
         var svg = d3.select("#map").append("svg")
-                .attr("width", width)
-                .attr("height", height)
+                .attr("width", width+'px')
+                .attr("height", height+'px')
                 .attr("id", "mapPalette")
                 .append("g");
         this.svg = svg;
@@ -228,6 +231,7 @@ var CrimeMap = {
 
             var path = d3.geo.path().projection(projection);
             var bounds  = path.bounds(geojson);
+            this.bounds = bounds;
             var hscale  = scale*width  / (bounds[1][0] - bounds[0][0]);
             var vscale  = scale*height / (bounds[1][1] - bounds[0][1]);
             var scale   = (hscale < vscale) ? hscale : vscale;
@@ -236,10 +240,12 @@ var CrimeMap = {
 
             projection = d3.geo.mercator().center(center)
                 .scale(scale).translate(offset);
+            this.projection = projection;
             path = path.projection(projection);
+            this.path = path;
 
-            svg.append("rect").attr('width', width).attr('height', height)
-                    .style('stroke', 'black').style('fill', 'none');
+            // svg.append("rect").attr('width', width).attr('height', height)
+            //         .style('stroke', 'black').style('fill', 'none');
 
             svg.selectAll(".tract")
                     .data(geojson.features)
@@ -402,8 +408,24 @@ var CrimeMap = {
         .attr("transform", "");
     },
     resize: function() {
+        var scale = 150;
         var width = parseInt(d3.select('#map').style('width'));
         var height = width * this.MAP_RATIO;
+        var hscale  = scale*width  / (this.bounds[1][0] - this.bounds[0][0]);
+        var vscale  = scale*height / (this.bounds[1][1] - this.bounds[0][1]);
+        var scale   = (hscale < vscale) ? hscale : vscale;
+        var offset  = [width - (this.bounds[0][0] + this.bounds[1][0])/2,
+                       height - (this.bounds[0][1] + this.bounds[1][1])/2];
+        this.projection
+            .translate(offset)
+            .scale(scale);
+
+        d3.select("#mapPalette")
+            .attr("width", width+'px')
+            .attr("height", height+'px')
+
+        this.svg.selectAll('.area').attr('d', this.path);
+        this.svg.selectAll('.tract').attr('d', this.path);
 
     }
 }
@@ -411,5 +433,6 @@ var CrimeMap = {
 $().ready(function () {
     var crimeMap = Object.create(CrimeMap);
     crimeMap.draw.bind(crimeMap)();
+    d3.select(window).on('resize', crimeMap.resize.bind(crimeMap));
     missionControl.addClient(crimeMap.display.bind(crimeMap));
 });
