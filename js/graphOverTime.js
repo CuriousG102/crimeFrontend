@@ -8,6 +8,7 @@ var Graph1 = {
   yAxis: null,
   xScaler: null,
   xAxis: null,
+  tip:null,
 
   getWidthsAndHeights: function() {
     var width = parseInt(d3.select("#graph1Container").style("width"));
@@ -23,13 +24,18 @@ var Graph1 = {
   setupGraph: function() {
     var wAndH = this.getWidthsAndHeights();    
 
+    this.tip = d3.tip()
+    .attr('class', 'graph-tip')
+    .html(function(d) { return "<strong>Count:</strong> <span style='color:red'>" + d.count + "</span>"; })
+
     this.graph1 = d3.select("#graph1")
                     .attr("width", wAndH.width)
                     .attr("height", wAndH.height)
                   .append("g")
                     .attr("transform", 
                           "translate(" + this.MARGIN.left 
-                            + "," + this.MARGIN.top + ")");
+                            + "," + this.MARGIN.top + ")")
+                    .call(this.tip);
     this.yScaler = d3.scale.linear()
                   .range([wAndH.inner_height, 0]);
   },
@@ -118,6 +124,8 @@ var Graph1 = {
             .attr("y", function(d) { return this.yScaler(d.count); }.bind(this))
             .attr("height", function(d) { return inner_height - this.yScaler(d.count); }.bind(this))
             .attr("width", this.xScaler.rangeBand());
+            .on("mouseover", this.tip.show.bind(this))
+            .on("mouseout", this.tip.hide);
     this.graph1.append("g")
             .attr("class", "xAxis")
             .attr("transform", "translate(0," + inner_height + ")")
