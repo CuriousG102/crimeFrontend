@@ -1,12 +1,12 @@
-.graph1 rect {
+#graph1 rect {
 	fill: #253494;
 }
 
-.graph2 rect {
+#graph2 rect {
 	fill: #2c7fb8;
 }
 
-.graph3 rect {
+#graph3 rect {
 	fill: #41b6c4;
 }
 

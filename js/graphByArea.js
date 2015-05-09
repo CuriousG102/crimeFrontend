@@ -1,27 +1,39 @@
 var Graph3 = {
-  GRAPH_WIDTH: 600,
-  GRAPH_HEIGHT: 500,
-  inner_width: null,
-  inner_height: null,
+  RATIO: 5/6,
   graph3: null,
-  yScaler: null,
-  xScaler: null,
+  MARGIN: {top: 20, right: 30, bottom: 120, left: 60},
+
+  getWidthsAndHeights: function() {
+    var width = parseInt(d3.select("#graph3Container").style("width"));
+    var height = this.RATIO * width;
+    var inner_width = width - this.MARGIN.left - this.MARGIN.right;
+    var inner_height = height - this.MARGIN.top - this.MARGIN.bottom;
+    return {width: width,
+            height: height,
+            inner_height: inner_height,
+            inner_width: inner_width};
+  },
 
   setupGraph: function() {
-    var margin = {top: 20, right: 30, bottom: 120, left: 60};
-    this.inner_width = this.GRAPH_WIDTH - margin.left - margin.right;
-    this.inner_height = this.GRAPH_HEIGHT - margin.top - margin.bottom;
+    var wAndH = this.getWidthsAndHeights();    
 
-    this.graph3 = d3.select(".graph3")
-                    .attr("width", this.GRAPH_WIDTH)
-                    .attr("height", this.GRAPH_HEIGHT)
+    this.graph3 = d3.select("#graph3")
+                    .attr("width", wAndH.width)
+                    .attr("height", wAndH.height)
                   .append("g")
-                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                    .attr("transform", 
+                          "translate(" + this.MARGIN.left 
+                            + "," + this.MARGIN.top + ")");
 
   },
 
   drawGraph: function(start, end, data) {
+    var wAndH = this.getWidthsAndHeights();
+    var inner_width = wAndH.inner_width;
+    var inner_height = wAndH.inner_height;
 
+    var width = parseInt(d3.select("#graph3Container").style("width"), 10)
+    
     var currentData = [];
     for (var key in data) {
       if (data.hasOwnProperty(key) && key != "") {
@@ -34,23 +46,23 @@ var Graph3 = {
     };
 
     // make y-axis
-    this.yScaler = d3.scale.linear()
-            .range([this.inner_height, 0])
+    var yScaler = d3.scale.linear()
+            .range([inner_height, 0])
             .domain([0, d3.max(currentData, function(d) { return d.count; })]);
 
     var yAxis = d3.svg.axis()
-    .scale(this.yScaler)
+    .scale(yScaler)
     .ticks(11)
     .orient("left");
 
     // if the max value is 8, set ticks so there are no decimals
     if ( d3.max(currentData, function(d) { return d.count; }) <= 9) {
-     this.yScaler = d3.scale.linear()
-              .range([this.inner_height, 0])
+      yScaler = d3.scale.linear()
+              .range([inner_height, 0])
               .domain([0, 9]);
 
       var yAxis = d3.svg.axis()
-      .scale(this.yScaler)
+      .scale(yScaler)
       .tickValues([0,1,2,3,4,5,6,7,8,9])
       .orient("left");
     };
@@ -71,12 +83,12 @@ var Graph3 = {
 
 
     // make x-axis
-    this.xScaler = d3.scale.ordinal() 
-        .rangeRoundBands([0, this.inner_width], .1)
+    var xScaler = d3.scale.ordinal() 
+        .rangeRoundBands([0, inner_width], .1)
         .domain(currentData.map(function(d) { return d.name; }));
 
     var xAxis = d3.svg.axis()
-    .scale(this.xScaler) 
+    .scale(xScaler) 
     .orient("bottom");
 
     // add bars
@@ -91,13 +103,14 @@ var Graph3 = {
 
     selectionEnter.append("rect")
             .attr("class", "bar")
-            .attr("x", function(d) { return this.xScaler(d.name); }.bind(this))
-            .attr("y", function(d) { return this.yScaler(d.count); }.bind(this))
-            .attr("height", function(d) { return this.inner_height - this.yScaler(d.count); }.bind(this))
-            .attr("width", this.xScaler.rangeBand());
+            .attr("x", function(d) { return this.xScaler(d.name); }.bind({xScaler:xScaler}))
+            .attr("y", function(d) { return this.yScaler(d.count); }.bind({yScaler:yScaler}))
+            .attr("height", function(d) { return this.inner_height - this.yScaler(d.count); }.bind({inner_height:inner_height,
+                                                                                                    yScaler:yScaler}))
+            .attr("width", xScaler.rangeBand());
     this.graph3.append("g")
             .attr("class", "xAxis")
-            .attr("transform", "translate(0," + this.inner_height + ")")
+            .attr("transform", "translate(0," + inner_height + ")")
             .call(xAxis)
             .selectAll("text")  
             .style("text-anchor", "end")
@@ -110,10 +123,11 @@ var Graph3 = {
     // update bars
     selection
           .attr("class", "bar")
-          .attr("x", function(d) { return this.xScaler(d.name); }.bind(this))
-          .attr("y", function(d) { return this.yScaler(d.count); }.bind(this))
-          .attr("height", function(d) { return this.inner_height - this.yScaler(d.count); }.bind(this))
-          .attr("width", this.xScaler.rangeBand());
+          .attr("x", function(d) { return this.xScaler(d.name); }.bind({xScaler:xScaler}))
+          .attr("y", function(d) { return this.yScaler(d.count); }.bind({yScaler:yScaler}))
+          .attr("height", function(d) { return this.inner_height - this.yScaler(d.count); }.bind({inner_height:inner_height,
+                                                                                                  yScaler:yScaler}))
+          .attr("width", xScaler.rangeBand());
 
     // clear graph for next set of bars
     selection.exit().remove();
