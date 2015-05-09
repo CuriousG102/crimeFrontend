@@ -26,7 +26,7 @@ var CrimeMap = {
     bounds: null,
     projection: null,
     path: null,
-    
+
     plotLegend: function(isArea) {
         var legendBox = d3.select("#mapLegend").html("");
 
@@ -148,7 +148,7 @@ var CrimeMap = {
                     .style("fill", this.DEFAULT_COLOR)
                     .style("stroke-width", "1")
                     .style("stroke", this.BORDER_COLORS)
-                    .on("click", function(path, d) {
+                    .on("click", function(d) {
                         // if the area only encompasses
                         // one census tract it makes
                         // no sense at all to zoom. Same for no colors in areas.
@@ -169,7 +169,7 @@ var CrimeMap = {
                                                .style("visibility", "hidden");
 
                         // http://bl.ocks.org/mbostock/4699541
-                        var bounds = path.bounds(d),
+                        var bounds = this.path.bounds(d),
                             dx = bounds[1][0] - bounds[0][0],
                             dy = bounds[1][1] - bounds[0][1],
                             x = (bounds[0][0] + bounds[1][0]) / 2,
@@ -181,7 +181,7 @@ var CrimeMap = {
                             .duration(750)
                             .style("stroke-width", 1.5 / scale + "px")
                             .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
-                    }.bind(this, path))
+                    }.bind(this))
                     .on("mouseover", function(d) {
                         var descriptorName;
                         if (d.properties.AREA_NAME) 
